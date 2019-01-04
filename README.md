@@ -123,7 +123,9 @@ export default {
 | leftTitle   |  左边折叠面板的标题 | string     |-     | left  |
 | rightTitle  |  右边折叠面板的标题 | string     |-     | right  |
 | collapseAccordion  |  折叠面板是否开启手风琴模式(只展开一个面板) | boolean     |-     | false  |
+```
 
+```
 ### Methods
 
 |  方法名 |    说明                    |   参数      |
@@ -139,3 +141,4 @@ export default {
 |checked-change | 行选中状态改变时触发 | {left: [左边选中的ID组成的数组]right: [右边选中的ID组成的数组] }    |
 |select | 选中线条时触发 | id    |
 |unselect | 取消线条选中时触发 | id    |
+```
