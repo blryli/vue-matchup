@@ -93,9 +93,11 @@ module.exports = {
     extensions: ['*', '.js', '.vue', '.json']
   },
   devServer: {
-    historyApiFallback: true,
-    noInfo: true,
-    overlay: true
+    // historyApiFallback: true,
+    // noInfo: true,
+    // overlay: true,
+    inline: true,
+    port: 2222
   },
   performance: {
     hints: false

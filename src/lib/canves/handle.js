@@ -9,17 +9,21 @@ export default {
       activeData: {
         id: ''
       },
+      checkLines: [],
       moveLine: false,
       isEdit: false
     }
   },
   watch: {
     activeData(val) {
-      console.log('activeData change')
+      if (val.id) {
+        this.$nextTick(() => {
+          val.id && this.$refs.input.focus();
+        })
+      } else {
+        this.checkLines = []
+      }
       this.drawLine(null, 'click');
-      this.$nextTick(() => {
-        val.id && this.$refs.input.focus();
-      })
     },
     isEdit(val) {
       console.log(val)
@@ -31,7 +35,7 @@ export default {
     move(e) {
       if (this.isEdit || !this.lines.length) return;
       this.movePosition = this.getEventPosition(e);
-      this.drawLine(e, 'move');
+      // this.drawLine(e, 'move');
       !this.moveLine && (this.moveData = {
         id: ''
       });
@@ -50,16 +54,12 @@ export default {
       this.isEdit = true;
       this.$emit('dblclick', this.moveData);
     },
-    deleted(id) {
+    deleted() {
       if (this.isEdit) return;
-      if (this.activeData.id || id) {
-        const deleteId = id || this.activeData.id;
+      if (this.activeData.id) {
         // 删除线
-        const index = this.lines.findIndex(d => d.id === deleteId);
-        this.lines.splice(index, 1);
-        this.$emit('input', this.lines)
-        this.$emit("delete", deleteId);
-        this.drawLine();
+        const index = this.lines.findIndex(d => d.id === this.activeData.id);
+        this.$emit("delete", index);
       }
       this.activeData = {
         id: ''
@@ -68,17 +68,9 @@ export default {
         id: ''
       }
     },
-    save() {
-
-    },
-    setColor(val) {
-      if (!val || !this.activeData.id) return;
-      this.lines.forEach(d => {
-        d.id === this.activeData.id && this.$set(d, 'color', val);
-      })
-      this.$emit('input', this.lines);
-      this.activeData.color = val;
-      this.drawLine();
+    setCheckLine(lines) {
+      this.checkLines = lines;
+      this.drawLine(null, 'click');
     },
     getEventPosition(ev) {
       let x, y;

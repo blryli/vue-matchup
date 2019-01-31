@@ -30,11 +30,6 @@ Raphael.fn.drawArr = function (obj) {
 function getStartEnd(obj1, obj2) {
   var bb1 = obj1.getBBox();
   var bb2 = obj2.getBBox();
-  console.log('obj1')
-  console.log(obj1)
-  console.log(obj1.getBBox())
-  console.log('bb1')
-  console.log(bb1)
   var p = [{
       x: bb1.x + bb1.width / 2,
       y: bb1.y - 1

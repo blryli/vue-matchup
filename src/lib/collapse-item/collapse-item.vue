@@ -1,8 +1,17 @@
 <template>
-  <div class="collapse-item">
+  <div class="collapse-item" :style="{'--duration': `${duration/1000}s`}">
     <div class="collapse-item__header" :class="{active: active}" @click="change">{{title}}</div>
-    <div class="collapse-item__wrap" :class="{active: active}" :dir="scrollDir === 'left' ? 'rtl' : undefined">
-      <div class="collapse-item__content" ref="content" :style="{'--height': height  + 'px'}" :dir="scrollDir === 'left' ? 'ltr' : undefined">
+    <div
+      class="collapse-item__wrap"
+      :class="{active: active}"
+      :dir="scrollDir === 'left' ? 'rtl' : undefined"
+    >
+      <div
+        class="collapse-item__content"
+        ref="content"
+        :style="{'--height': height  + 'px'}"
+        :dir="scrollDir === 'left' ? 'ltr' : undefined"
+      >
         <slot></slot>
       </div>
     </div>
@@ -17,12 +26,13 @@ export default {
     name: [String, Number],
     scrollDir: {
       type: String,
-      default: 'right'
+      default: "right"
     },
-    time: {
+    duration: {
       type: Number,
       default: 300
-    }
+    },
+    dataChange: Boolean
   },
   computed: {
     activeName() {
@@ -35,6 +45,9 @@ export default {
   watch: {
     activeName(val) {
       this.accordion && `${val}` !== `${this.name}` && (this.active = false);
+    },
+    dataChange() {
+      this.setContentHeight();
     }
   },
   data() {
@@ -48,37 +61,54 @@ export default {
       this.active = !this.active;
       if (this.accordion) {
         if (this.activeName && Array.isArray(this.activeName)) {
-          const index = this.activeName.findIndex(d => `${d}` === `${this.name}`);
+          const index = this.activeName.findIndex(
+            d => `${d}` === `${this.name}`
+          );
           if (this.active) {
-            this.$set(this.$parent.$data, "activeName", `${this.name}`)
+            this.$set(this.$parent.$data, "activeName", `${this.name}`);
           } else {
             this.activeName.splice(index, 1);
-            this.$set(this.$parent.$data, "activeName", `${this.activeName[0]}`)
+            this.$set(
+              this.$parent.$data,
+              "activeName",
+              `${this.activeName[0]}`
+            );
           }
         } else {
-          this.active ? this.$set(this.$parent.$data, "activeName", `${this.name}`) : this.$set(this.$parent.$data, "activeName", '');
+          this.active
+            ? this.$set(this.$parent.$data, "activeName", `${this.name}`)
+            : this.$set(this.$parent.$data, "activeName", "");
         }
       } else {
         if (this.activeName && Array.isArray(this.activeName)) {
-          const index = this.activeName.findIndex(d => `${d}` === `${this.name}`);
+          const index = this.activeName.findIndex(
+            d => `${d}` === `${this.name}`
+          );
           if (this.active) {
             index === -1 && this.activeName.push(`${this.name}`);
           } else {
-            this.activeName.splice(index, 1)
+            this.activeName.splice(index, 1);
           }
         }
       }
+    },
+    setContentHeight() {
+      this.$refs.content.style.height = "auto";
+      this.height = this.$refs.content.offsetHeight;
+      this.$refs.content.removeAttribute("style");
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.$refs.content.style.height = "auto";
-      this.height = this.$refs.content.offsetHeight;
-      this.$refs.content.removeAttribute("style");
+      this.setContentHeight();
 
-      !this.accordion && this.activeName && !Array.isArray(this.activeName) && this.$set(this.$parent.$data, "activeName", [this.activeName]);
+      !this.accordion &&
+        this.activeName &&
+        !Array.isArray(this.activeName) &&
+        this.$set(this.$parent.$data, "activeName", [this.activeName]);
       if (this.activeName && Array.isArray(this.activeName)) {
-        this.activeName.find(d => `${d}` === `${this.name}`) && (this.active = true);
+        this.activeName.find(d => `${d}` === `${this.name}`) &&
+          (this.active = true);
       } else {
         `${this.activeName}` === `${this.name}` && (this.active = true);
       }
@@ -101,7 +131,8 @@ export default {
   border-bottom: 1px solid #ebeef5;
   font-size: 13px;
   font-weight: 500;
-  transition: border-bottom-color 0.3s;
+  transition-property: border-bottom-color;
+  transition-duration: var(--duration);
   outline: none;
   &::after {
     content: "";
@@ -116,7 +147,8 @@ export default {
     right: 15px;
     opacity: 0.7;
     transform: rotate(-45deg);
-    transition: all 1s;
+    transition-property: all;
+    transition-duration: var(--duration);
   }
   &.active {
     border-bottom-color: transparent;
@@ -129,7 +161,7 @@ export default {
   background-color: #fff;
   overflow: hidden;
   &.active {
-      border-bottom: 1px solid #ebeef5;
+    border-bottom: 1px solid #dfe2e9;
     .collapse-item__content {
       height: var(--height);
     }
@@ -142,7 +174,8 @@ export default {
   line-height: 1.769230769230769;
   border-bottom: 0;
   box-sizing: border-box;
-  transition: all .3s;
+  transition-property: all;
+  transition-duration: var(--duration);
 }
 
 .collapse-item__wrap {

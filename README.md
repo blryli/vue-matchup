@@ -18,9 +18,6 @@ npm i vue-matchup -S
 import VueMatchup from 'vue-matchup'
 
 Vue.use(VueMatchup)
-
-// 或者直接使用script导入
-<script src="https://unpkg.com/vue-matchup/dist/vue-matchup.js"></script>
 ```
 
 #### 基本使用
@@ -43,67 +40,43 @@ Vue.use(VueMatchup)
 export default {
   data () {
     return {
-      // 如果有已经确定的对应关系，需要直接连接，只需要如下结构
-      // lines: [{leftId: '1-1', rightId: '1-2'}]
       lines: [],
-      leftData: [],
-      rightData: [],
-      leftThead: [],
-      rightThead: [],
-    }
-  }
-}
-</script>
-```
-
-#### 改变线条颜色
-
-> 本例使用element-ui组件，当然可以使用任何组件。
-
-```html
-<template>
-  <vue-matchup
-    ref="matchup"
-    v-model="lines"
-    :leftData="leftData"
-    :rightData="rightData"
-    :leftThead="leftThead"
-    :rightThead="rightThead"
-    @unselect="unselect"
-  >
-    <template slot-scope="{ disabled }">
-      属性
-      <el-select v-model="value" placeholder="请选择" :disabled="disabled" @change="change">
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        ></el-option>
-      </el-select>
-    </template>
-  </vue-matchup>
-</template>
-```
-
-```js
-<script>
-export default {
-  data () {
-    return {
-      lines: [],
-      leftData: [],
-      rightData: [],
-      leftThead: [],
-      rightThead: [],
-    }
-  },
-  methods: {
-    change(val) {
-      this.$refs.matchup.setColor(val);
-    },
-    unselect() {
-      this.value = '';
+      leftData: [
+        {
+          lineNo: 0,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" }
+        }
+      ],
+      rightData: [
+        {
+          lineNo: 1,
+          qty: 100,
+          unit: "KG"
+        }
+      ],
+      leftThead: [
+        {
+          title: "序号",
+          props: "lineNo"
+        },
+        {
+          title: "净重",
+          props: "nw/weight" // table需要展示的数据，嵌套对象结构用'/'分隔
+        }
+      ],
+      rightThead: [
+        {
+          title: "序号",
+          props: "lineNo"
+        },
+        {
+          title: "数量",
+          props: "qty"
+        }
+      ]
     }
   }
 }
@@ -114,29 +87,53 @@ export default {
 
 |    参数     |    说明         |   类型     |可选值  |默认值|
 | ---------  | ----------      | --------   |----  | ----- |
-| lines      | 连接的数据       | array      |-     | []    |
-| leftData   |  左边展示的数据   | array       |-     | []  |
-| rightData   |  右边展示的数据   | array       |-     | []  |
-| leftThead   |  左边数据的标题   | array       |-     | []  |
-| rightThead  |  右边数据的标题   | array       |-     | []  |
-| leftTitle   |  左边折叠面板的标题 | string     |-     | left  |
-| rightTitle  |  右边折叠面板的标题 | string     |-     | right  |
+| lines      | 连接线的集合       | array      |-     | []    |
+| leftData   |  左面板展示的数据   | array       |-     | []  |
+| rightData   |  右面板展示的数据   | array       |-     | []  |
+| leftThead   |  左面板数据的标题及展示的字段[{title: 'title', props: 'props'}]   | string/array       |-     | []  |
+| rightThead  |  右面板数据的标题及展示的字段[{title: 'title', props: 'props'}]   | string/array       |-     | []  |
+| leftTitle   |  左面板折叠面板的标题，单个面板为string/array，多个面板为array ['title','title'] | string/array     |-     | left  |
+| rightTitle  |  右面板折叠面板的标题，单个面板为string/array，多个面板为array ['title','title'] | string/array     |-     | right  |
+| leftIdFun  |  自定义左面板row的id，此id用于切换行选中效果，及定义线条leftId与rightId，(row, index) => `leftId:${index}-${row.lineNo}`，第一个回调参数为行数据，第二个回调参数为行号，leftIdFun不存在则使用默认id| function     |-     | -  |
+| rightIdFun  |  自定义右面板row的id，此id用于切换行选中效果，及定义线条leftId与rightId，(row, index) => `rightId:${index}-${row.lineNo}`，第一个回调参数为行数据，第二个回调参数为行号，leftIdFun不存在则使用默认id| function     |-     | -  |
+| popover  |  移入行时是否使用 popover 展示行详细内容 | boolean     |-     | false  |
+| popoverEnterable  |  popover 是否可移入 | boolean     |-     | false  |
+| popoverHideDelay  |  popover 显示隐藏的延时，popoverEnterable为true时可用 | number     |-     | 200  |
 | collapseAccordion  |  折叠面板是否开启手风琴模式(只展开一个面板) | boolean     |-     | false  |
 
 ### Methods
 
 |  方法名 |    说明                    |   参数      |
 |-------- |------                      |------       |
-|join    | 连接线的方法            |-       |
+|init    | 在数据异步获取成功后，及页面加载时组件由不可见切换到可见状态必须执行init方法            |-      |
+|leftCheckRow    | 左面板选中行的方法，参数为row的id            |id      |
+|rightCheckRow    | 右面板选中行的方法，参数为row的id            |id      |
+|join    | 连接线的方法，若传入参数，第一个参数是左面板选中id的数组，第二个参数是右面板选中id的数组，第三个参数是回调函数function(line){}，参数line为当前线，设置的属性会添加或覆盖到当连接前线，若不传参数则连接当前左右两侧面板选中选中的行            |array,array,funtion       |
+|setCheckLine    | 选中线的方法，参数为要选中线条id组成的数组            | array      |
 |drawLine    | 画布重绘            |-       |
-|setColor    | 设置线条颜色，此方法作用于当前选中的线条            |  颜色值     |
-|delete    | 删除线条，参数是传进来的ID，不传则默认是当前选中的ID   |  id     |
+|setColor    | 设置线条颜色，此方法作用于当前选中的线条，参数是色值            |  string     |
+|delete    | 删除线条，参数是传进来的ID，类型string/array，不传则删除当前选中的线   |  array     |
 
 ### Events
 
 |  事件名 |    说明                    |   回调参数      |
 |-------- |------                      |------       |
-|delete | 删除线条时触发 | 当前删除线条的ID    |
-|checked-change | 行选中状态改变时触发 | {left: [左边选中的ID组成的数组]right: [右边选中的ID组成的数组] }    |
-|select | 选中线条时触发 | id    |
-|unselect | 取消线条选中时触发 | id    |
+|checkRow | 选中行时触发 | id    |
+|unCheckRow | 取消选中行时触发 | id    |
+|checkLine | 选中线时触发 | id    |
+|unCheckLine | 取消选中线时触发 | id    |
+|leftCheckChange | 左面板选中行的回调，回调参数是左面板选中行id组成的数组 | array    |
+|rightCheckChange | 右面板选中行的回调，回调参数是右面板选中行id组成的数组 | array    |
+|delete | 删除线条时触发 | id    |
+
+#### 行id
+
+左右面板默认使用多层结构，默认id格式为 面板选项卡-行号，即 L1-1、R1-2，L2-1、R2-2的格式。
+
+> 自定义行id使用leftIdFun、rightIdFun属性，第一个回调参数为行数据，第二个回调参数为行号
+
+#### 线id
+
+线id默认使用 leftId 与 rightId 的组合，格式为 leftId--rightId，即 L1-1--R1-2。
+
+> 自定义线id，在连接线方法join的第三个参数中设置，该参数是回调函数，参数为line即当前线，设置的属性会添加或覆盖到当前连接线。

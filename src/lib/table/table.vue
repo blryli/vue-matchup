@@ -1,60 +1,172 @@
 <template>
-  <table class="table">
-    <thead>
-      <tr>
-        <th v-for="(d, i) in theadData" :key="i" :width="d.width">
-          <div class="cell">{{d.title}}</div>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="table__row" v-for="(da, idx) in tbodyData" :key="idx" :class="{active: handleData[idx].check}" @click="clickRow(idx)">
-        <td v-for="(d, i) in Object.keys(da)" :key="i">
-          <div class="cell">{{da[d]}}</div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th v-for="(d, i) in theadData" :key="i" :width="d.width">
+            <div class="cell">{{d.title}}</div>
+          </th>
+          <td width="1">
+            <div class="cell"></div>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="table__row"
+          v-for="(da, idx) in tbodyData"
+          :key="idx"
+          :class="{active: handleData[idx].check}"
+          @click="clickRow(idx)"
+          @mouseenter="mouseenter($event, da, handleData[idx].id)"
+          @mouseleave="mouseleave"
+        >
+          <td v-for="(d, i) in theadData" :key="i">
+            <div class="cell">{{getValue(da, d.props)}}</div>
+          </td>
+          <td :id="(idFun && idFun(da, row + 1)) || `${pos}${row + 1}-${idx + 1}`">
+            <div class="cell"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <vue-popover
+      v-if="popover"
+      v-model="mouseenterId"
+      :position="position"
+      :data="popoverContent"
+      :pos="pos"
+      :enterable="enterable"
+      :showBg="showBg"
+      @mouseenter="mouseenterPopover"
+      @mouseleave="mouseleavePopover"
+    ></vue-popover>
+    <div v-if="!tbodyData.length" class="no-data cell">无数据</div>
+  </div>
 </template>
 
 <script>
+import { offset } from "../../utils/util";
 export default {
   name: "r-table",
   props: {
     value: Array,
     theadData: Array,
     tbodyData: Array,
-    row: Number
+    idFun: Function,
+    row: Number,
+    pos: String,
+    popover: Boolean,
+    enterable: Boolean,
+    hideDelay: Number,
+    popoverContentFun: Function
   },
   data() {
     return {
-      handleData: []
+      handleData: [],
+      position: {
+        top: 0,
+        center: 0,
+        bottom: 0
+      },
+      mouseenterId: null,
+      timeoutPending: null,
+      popoverContent: null,
+      timeoutBg: null,
+      showBg: false
     };
   },
   created() {
-    this.tbodyData.forEach((d, i) => {
-      const id = typeof this.row === 'number' ? `${this.row + 1}-${i + 1}` : i + 1;
-      this.handleData.push({id: id, check: false})
-    })
+    this.tbodyData.length && this.init();
   },
-  computed: {
-    
+  watch: {
+    tbodyData(val) {
+      this.init();
+    }
   },
-  watch: {},
   methods: {
-    clickRow(i) {
-      this.handleData[i].check = !this.handleData[i].check;
-      const checked = [];
+    init() {
+      this.tbodyData.forEach((d, i) => {
+        const id =
+          (this.idFun && this.idFun(d, this.row + 1)) ||
+          `${this.pos}${this.row + 1}-${i + 1}`;
+        this.handleData.push({ id: id, check: false });
+      });
+    },
+    checkRow(id) {
+      const index = this.handleData.findIndex(d => d.id === id);
+      index !== -1 && this.clickRow(index);
+    },
+    clickRow(idx) {
+      const handleRow = this.handleData[idx];
+      handleRow.check = !handleRow.check;
+      const checkIds = [];
       this.handleData.forEach(d => {
-        d.check && checked.push(d.id);
-      })
-      this.$emit('checkChange', checked);
+        d.check && checkIds.push(d.id);
+      });
+      this.$emit("checkChange", checkIds, this.row);
+      handleRow.check
+        ? this.$emit("checkRow", handleRow.id)
+        : this.$emit("unCheckRow", handleRow.id);
     },
     clearCheck() {
       this.handleData.forEach(d => {
         d.check = false;
-      })
-      this.$emit('checkChange', []);
+      });
+      this.$emit("checkChange", []);
+    },
+    mouseenter(e, obj, id) {
+      if (this.enterable) {
+        clearTimeout(this.timeoutBg);
+        this.showBg = true;
+        clearTimeout(this.timeoutPending);
+        this.setMouseenterTarget(e.target, obj, id);
+      } else {
+        this.setMouseenterTarget(e.target, obj, id);
+      }
+    },
+    setMouseenterTarget(node, obj, id) {
+      if (!this.popover || !this.popoverContentFun) return;
+      const top = offset(node).top;
+      const left = offset(node).left;
+      const bottom = node.offsetHeight + top;
+      const center = node.offsetWidth / 2 + left;
+      this.position = { top: top, center: center, bottom: bottom };
+      this.mouseenterId = id;
+      this.popoverContent = this.popoverContentFun(obj);
+    },
+    mouseleave() {
+      if (this.enterable) {
+        this.timeoutBg = setTimeout(() => {
+          this.showBg = false;
+        }, this.hideDelay);
+        this.timeoutPending = setTimeout(() => {
+          this.mouseenterId = null;
+        }, this.hideDelay);
+      } else {
+        this.mouseenterId = null;
+      }
+    },
+    mouseenterPopover() {
+      clearTimeout(this.timeoutBg);
+      this.showBg = true;
+      clearTimeout(this.timeoutPending);
+    },
+    mouseleavePopover() {
+      this.timeoutBg = setTimeout(() => {
+        this.showBg = false;
+      }, this.hideDelay);
+      this.timeoutPending = setTimeout(() => {
+        this.mouseenterId = null;
+      }, this.hideDelay);
+    },
+    getValue(data, props) {
+      const arr = props.split("/");
+      let value = null;
+      arr.forEach(d => {
+        value = value ? value[d] : data[d];
+      });
+      return value;
     }
   }
 };
@@ -62,7 +174,6 @@ export default {
 
 <style lang="scss" scoped>
 .table {
-  width: 100%;
   table-layout: fixed;
   border-collapse: separate;
   position: relative;
@@ -78,7 +189,7 @@ export default {
     color: #909399;
     font-weight: 500;
   }
-  tbody{
+  tbody {
     position: relative;
   }
   th {
@@ -96,7 +207,7 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     background-color: #fff;
-    border-bottom: 1px solid #ebeef5;
+    border-bottom: 1px solid #dfe2e9;
   }
   .cell {
     box-sizing: border-box;
@@ -135,13 +246,17 @@ table {
   &:hover {
     background-color: #f5f7fa;
   }
-  &.active{
+  &.active {
     background-color: #71b6fc;
     color: #fff;
   }
   td {
     background-color: transparent;
   }
+}
+.no-data {
+  padding: 10px 0;
+  text-align: center;
 }
 </style>
 

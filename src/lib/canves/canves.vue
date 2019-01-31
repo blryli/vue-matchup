@@ -9,7 +9,7 @@
       @click="check($event)"
       @dblclick="edit($event)"
     ></canvas>
-    <input class="flows__handle-input" type="text" ref="input" @keyup.delete="deleted">
+    <input class="flows__handle-input" type="text" ref="input" @keyup.delete="deleted(null)">
   </div>
 </template>
 
@@ -19,7 +19,7 @@ import Graph from "./graph";
 import Handle from "./handle";
 
 export default {
-  name: "canves",
+  name: "m-canves",
   mixins: [Graph, Handle],
   props: {
     width: Number,
@@ -45,30 +45,38 @@ export default {
       type: Number,
       default: 50
     },
-    time: {
+    duration: {
       type: Number,
       default: 300
     },
-    readonly: Boolean
+    readonly: Boolean,
+    fullEdition: Boolean,
+    activeColor: {
+      type: String,
+      default: "#139BD4"
+    }
   },
   data() {
     return {
       canvas: "",
       ctx: "",
-      lines: [],
       leftActiveNameOld: JSON.parse(JSON.stringify(this.leftActiveName)),
       leftCloseName: null,
       rightActiveNameOld: JSON.parse(JSON.stringify(this.rightActiveName)),
       rightCloseName: null,
-      drawNum: 0
+      drawNum: 0,
+      groupsId: 0
     };
   },
   created() {
     this.$nextTick(() => {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext("2d");
-      this.lines = this.value;
+      this.init();
     });
+  },
+  computed: {
+    lines() {
+      return JSON.parse(JSON.stringify(this.value)) || [];
+    }
   },
   watch: {
     leftActiveName(newVal, oldVal) {
@@ -91,7 +99,6 @@ export default {
         this.leftActiveNameOld = JSON.parse(JSON.stringify(newVal));
       }
       this.drawNum = 0;
-      console.log(this.leftCloseName);
     },
     rightActiveName(newVal, oldVal) {
       if (this.readonly) return;
@@ -113,54 +120,16 @@ export default {
         this.rightActiveNameOld = JSON.parse(JSON.stringify(newVal));
       }
       this.drawNum = 0;
-      console.log(this.rightCloseName);
     }
   },
   methods: {
-    // 建立连接关系
-    join() {
-      if (
-        this.leftCheckedIds.length === 1 &&
-        this.rightCheckedIds.length === 1
-      ) {
-        console.log("一对一");
-        const leftId = this.leftCheckedIds[0];
-        const rightId = this.rightCheckedIds[0];
-        const line = {
-          leftId: leftId,
-          rightId: rightId,
-        };
-        this.lines.push(line);
-      }
-      if (this.leftCheckedIds.length > 1 && this.rightCheckedIds.length === 1) {
-        console.log("多对一");
-        this.leftCheckedIds.forEach(d => {
-          const leftId = d;
-          const rightId = this.rightCheckedIds[0];
-          const line = {
-            leftId: leftId,
-            rightId: rightId,
-          };
-          this.lines.push(line);
-        });
-      }
-      if (this.leftCheckedIds.length === 1 && this.rightCheckedIds.length > 1) {
-        console.log("一对多");
-        this.rightCheckedIds.forEach(d => {
-          const leftId = this.leftCheckedIds[0];
-          const rightId = d;
-          const line = {
-            leftId: leftId,
-            rightId: rightId,
-          };
-          this.lines.push(line);
-        });
-      }
-      this.drawLine();
+    init() {
+      this.canvas = this.$refs.canvas;
+      this.ctx = this.canvas.getContext("2d");
     },
     // 画线
-    drawLine(e, event, color) {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    drawLine(e, event) {
+      this.ctx && this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       if (!this.lines.length) return;
       const leftHeader = this.$parent.$data.leftHeader;
       const rightHeader = this.$parent.$data.rightHeader;
@@ -169,21 +138,14 @@ export default {
       if (!leftContent || !rightContent) return;
       if (e === undefined && e !== null) {
         this.lines.forEach(line => {
-          const leftIndex = parseInt(line.leftId.split("-")[0] - 1);
-          const rightIndex = parseInt(line.rightId.split("-")[0] - 1);
-          const leftRow = parseInt(line.leftId.split("-")[1] - 1);
-          const rightRow = parseInt(line.rightId.split("-")[1] - 1);
-
-          const leftItem = leftContent[leftIndex] && leftContent[leftIndex].querySelectorAll(
-            ".table__row"
-          )[leftRow];
-          const rightItem = rightContent[rightIndex] && rightContent[rightIndex].querySelectorAll(
-            ".table__row"
-          )[rightRow];
-          line.id = `${line.leftId}--${line.rightId}`,
+          const leftItem = document.getElementById(line.leftId);
+          const rightItem = document.getElementById(line.rightId);
+          const leftIndex = leftContent.findIndex(d => d.contains(leftItem));
+          const rightIndex = rightContent.findIndex(d => d.contains(rightItem));
+          !line.id && (line.id = `${line.leftId}--${line.rightId}`);
           line.x1 = 0;
           line.x2 = this.width + this.offset * 2;
-          line.color = line.color || '#555';
+          line.color = line.color || "#555";
           let y1 =
             offset(leftItem).top +
             leftItem.offsetHeight / 2 -
@@ -225,7 +187,7 @@ export default {
               offset(leftHeader[leftIndex]).top +
               leftHeader[leftIndex].offsetHeight / 2;
             const leftOffsetY = y1 - leftHeaderY;
-            const speed = leftOffsetY / (this.time / 12);
+            const speed = leftOffsetY / (this.duration / 12);
             y1 > leftHeaderY && (y1 -= this.drawNum * speed);
             y1 < leftHeaderY && (y1 = leftHeaderY);
           }
@@ -262,22 +224,32 @@ export default {
               offset(rightHeader[rightIndex]).top +
               rightHeader[rightIndex].offsetHeight / 2;
             const rightOffsetY = y2 - rightHeaderY;
-            const speed = rightOffsetY / (this.time / 12);
+            const speed = rightOffsetY / (this.duration / 12);
             y2 > rightHeaderY && (y2 -= this.drawNum * speed);
             y2 < rightHeaderY && (y2 = rightHeaderY);
           }
 
           line.y1 = y1 - offset(this.$refs.canves).top;
           line.y2 = y2 - offset(this.$refs.canves).top;
-          this.Arrow(line.x1, line.y1, line.x2, line.y2, line.color, line.activeColor);
+          this.Arrow(
+            line.x1,
+            line.y1,
+            line.x2,
+            line.y2,
+            line.color,
+            line.activeColor
+          );
         });
       } else {
         this.moveLine = false;
         this.clickLine = false;
         this.lines.forEach(d => {
-          const activeColor =
-            this.activeData.id === d.id ? "#139BD4" : "transparent";
-          this.$set(d, "activeColor", activeColor);
+          !d.activeColor
+            ? this.$set(d, "activeColor", "transparent")
+            : (d.activeColor = "transparent");
+          (this.activeData.id === d.id ||
+            this.checkLines.find(c => c === d.id)) &&
+            (d.activeColor = this.activeColor);
           this.Arrow(d.x1, d.y1, d.x2, d.y2, d.color, d.activeColor);
           const p = e && this.getEventPosition(e);
           if (
@@ -290,20 +262,24 @@ export default {
               this.moveData = d;
               this.moveLine = true;
             } else if (event === "click") {
-              this.activeData = d;
-              this.clickLine = true;
+              if (
+                !this.activeData.id ||
+                (this.activeData.id && this.activeData.id !== d.id)
+              ) {
+                this.activeData = d;
+                this.clickLine = true;
+              }
             }
           }
         });
       }
-      this.$emit("input", this.lines);
     }
   },
   mounted() {
     this.$nextTick(() => {
       setTimeout(() => {
         this.lines.length && this.drawLine();
-      }, 310)
+      }, 350);
     });
   }
 };
