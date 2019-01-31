@@ -248,7 +248,7 @@ export default {
             ? this.$set(d, "activeColor", "transparent")
             : (d.activeColor = "transparent");
           (this.activeData.id === d.id ||
-            this.checkLines.find(c => c === d.id)) &&
+            this.checkedIds.find(c => c === d.id)) &&
             (d.activeColor = this.activeColor);
           this.Arrow(d.x1, d.y1, d.x2, d.y2, d.color, d.activeColor);
           const p = e && this.getEventPosition(e);

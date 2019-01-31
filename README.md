@@ -108,8 +108,10 @@ export default {
 |init    | 在数据异步获取成功后，及页面加载时组件由不可见切换到可见状态必须执行init方法            |-      |
 |leftCheckRow    | 左面板选中行的方法，参数为row的id            |id      |
 |rightCheckRow    | 右面板选中行的方法，参数为row的id            |id      |
+|clearChecked    | 全局清空选中面板            |-      |
 |join    | 连接线的方法，若传入参数，第一个参数是左面板选中id的数组，第二个参数是右面板选中id的数组，第三个参数是回调函数function(line){}，参数line为当前线，设置的属性会添加或覆盖到当连接前线，若不传参数则连接当前左右两侧面板选中选中的行            |array,array,funtion       |
-|setCheckLine    | 选中线的方法，参数为要选中线条id组成的数组            | array      |
+|checkLines    | 选中线的方法，参数为要选中线条id组成的数组            | array      |
+|unCheckedLines    | 重置线的选中状态的方法，参数为要清除线条id组成的数组            | array      |
 |drawLine    | 画布重绘            |-       |
 |setColor    | 设置线条颜色，此方法作用于当前选中的线条，参数是色值            |  string     |
 |delete    | 删除线条，参数是传进来的ID，类型string/array，不传则删除当前选中的线   |  array     |

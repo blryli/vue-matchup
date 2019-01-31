@@ -325,8 +325,11 @@ export default {
     unCheckRow(id) {
       this.$emit('unCheckRow', id);
     },
-    setCheckLine(lines) {
-      this.$refs.canves.setCheckLine(lines)
+    checkLines(ids) {
+      this.$refs.canves.checkLines(ids)
+    },
+    unCheckedLines(ids) {
+      this.$refs.canves.unCheckedLines(ids)
     },
     // 建立连接关系
     join(leftCheckedIds, rightCheckedIds, setAttr) {
@@ -359,7 +362,7 @@ export default {
           this.doLine(leftId, rightId, setAttr, "一对多");
         });
       }
-      this.clearCheck();
+      this.clearChecked();
     },
     doLine(leftId, rightId, setAttr, type) {
       // console.log(`line type ${type}`);
@@ -381,14 +384,14 @@ export default {
       this.drawLine();
     },
     // 清空
-    clearCheck() {
+    clearChecked() {
       this.leftCheckedIds = [];
       this.rightCheckedIds = [];
       this.$refs.leftTable.forEach(d => {
-        d.clearCheck();
+        d.clearChecked();
       });
       this.$refs.rightTable.forEach(d => {
-        d.clearCheck();
+        d.clearChecked();
       });
     },
     scrollChange(event, index) {

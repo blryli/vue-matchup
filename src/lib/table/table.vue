@@ -109,7 +109,7 @@ export default {
         ? this.$emit("checkRow", handleRow.id)
         : this.$emit("unCheckRow", handleRow.id);
     },
-    clearCheck() {
+    clearChecked() {
       this.handleData.forEach(d => {
         d.check = false;
       });

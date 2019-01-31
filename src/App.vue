@@ -6,7 +6,8 @@
         <button @click="joinLine">连接line</button>
         <button @click="leftCheckRow">左边选中</button>
         <button @click="rightCheckRow">右边选中</button>
-        <button @click="setCheckLine">选中线条</button>
+        <button @click="checkLines">选中线条</button>
+        <button @click="unCheckedLines">清除选中线条</button>
       </p>
     </center>
     <vue-matchup
@@ -38,56 +39,16 @@ export default {
   name: "app",
   data() {
     return {
-      leftIdFun: (row, index) => `leftId:${index}-${row.lineNo}`,
-      rightIdFun: (row, index) => `rightId:${index}-${row.lineNo}`,
+      leftIdFun: (row, index) => `L${index}-${row.lineNo}`,
+      rightIdFun: (row, index) => `R${index}-${row.lineNo}`,
       leftPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
           this.$createElement("span", {}, ["message"]),
           this.$createElement("span", {}, [data.lineNo])
         ]);
       },
       rightPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, ["message"]),
           this.$createElement("span", {}, ["message"]),
           this.$createElement("span", {}, [data])
         ]);
@@ -352,22 +313,26 @@ export default {
   methods: {
     // 左面板选中行的方法
     leftCheckRow() {
-      this.$refs.matchup.leftCheckRow("leftId:1-1");
+      this.$refs.matchup.leftCheckRow("L1-1");
     },
     // 右面板选中行的方法
     rightCheckRow() {
-      this.$refs.matchup.rightCheckRow("rightId:1-3");
+      this.$refs.matchup.rightCheckRow("R1-3");
     },
     // 连接的方法
     join() {
       this.$refs.matchup.join();
     },
     joinLine() {
-      this.$refs.matchup.join(['leftId:1-1'],['rightId:1-3'], line => line.color = 'red');
+      this.$refs.matchup.join(['L1-1'],['R1-3'], line => line.color = 'red');
+      this.$refs.matchup.join(['L1-2','L1-3'],['R1-4'], line => line.color = 'red');
     },
     // 选中线的方法
-    setCheckLine() {
-      this.$refs.matchup.setCheckLine(["leftId:1-1--rightId:1-3", "leftId:1-2--rightId:1-4"]);
+    checkLines() {
+      this.$refs.matchup.checkLines(["L1-1--R1-3", "L1-2--R1-4", "L1-3--R1-4"]);
+    },
+    unCheckedLines() {
+      this.$refs.matchup.unCheckedLines(["L1-1--R1-3", "L1-2--R1-4"]);
     },
     // 设置线color的方法
     setColor(val) {

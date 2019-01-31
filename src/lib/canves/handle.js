@@ -9,7 +9,7 @@ export default {
       activeData: {
         id: ''
       },
-      checkLines: [],
+      checkedLines: [],
       moveLine: false,
       isEdit: false
     }
@@ -21,7 +21,7 @@ export default {
           val.id && this.$refs.input.focus();
         })
       } else {
-        this.checkLines = []
+        this.checkedLines = []
       }
       this.drawLine(null, 'click');
     },
@@ -68,8 +68,19 @@ export default {
         id: ''
       }
     },
-    setCheckLine(lines) {
-      this.checkLines = lines;
+    checkLines(ids) {
+      this.checkedIds = ids;
+      this.drawLine(null, 'click');
+    },
+    unCheckedLines(ids) {
+      if (!ids || !ids.length) return;
+      for (let i = 0; i < this.checkedIds.length; i++) {
+        const checkedId = this.checkedIds[i];
+        if (ids.find(id => id === checkedId)) {
+          this.checkedIds.splice(i, 1);
+          i--;
+        }
+      }
       this.drawLine(null, 'click');
     },
     getEventPosition(ev) {
