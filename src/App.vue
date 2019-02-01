@@ -8,6 +8,7 @@
         <button @click="rightCheckRow">右边选中</button>
         <button @click="checkLines">选中线条</button>
         <button @click="unCheckedLines">清除选中线条</button>
+        <button @click="clearCheckedLines">清空选中线条</button>
       </p>
     </center>
     <vue-matchup
@@ -29,7 +30,6 @@
       @rightCheckChange="rightCheckChange"
       @delete="deleteFun"
     ></vue-matchup>
-    <div>aaa</div>
     <p>lines: {{lines}}</p>
   </div>
 </template>
@@ -331,8 +331,13 @@ export default {
     checkLines() {
       this.$refs.matchup.checkLines(["L1-1--R1-3", "L1-2--R1-4", "L1-3--R1-4"]);
     },
+    // 取消选中线的方法
     unCheckedLines() {
       this.$refs.matchup.unCheckedLines(["L1-1--R1-3", "L1-2--R1-4"]);
+    },
+    // 清空选中线的方法
+    clearCheckedLines() {
+      this.$refs.matchup.clearCheckedLines();
     },
     // 设置线color的方法
     setColor(val) {
@@ -361,10 +366,12 @@ export default {
     // 左面板选中改变时的回调
     leftCheckChange(obj) {
       console.log(`leftCheckChange ${JSON.stringify(obj)}`);
+      this.$refs.matchup.clearCheckedLines();
     },
     // 右面板选中改变时的回调
     rightCheckChange(obj) {
       console.log(`rightCheckChange ${JSON.stringify(obj)}`);
+      this.$refs.matchup.clearCheckedLines();
     }
   },
   mounted() {

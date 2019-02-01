@@ -6,7 +6,7 @@ export default {
     }
   },
   methods: {
-    Arrow(x1, y1, x2, y2, color = '#666', activeColor = 'transparent', width = 1.5, theta = 60, headlen = 3) {
+    Arrow(x1, y1, x2, y2, color = '#666', width = 1.6, theta = 60, headlen = 3) {
       // 把当做动作矩形画
       const angle = Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI;
       const lineAngle = (angle - 90) * Math.PI / 180;
@@ -39,12 +39,13 @@ export default {
       this.ctx.lineTo(arrowRightX, arrowRightY);
       this.ctx.lineTo(x2 - 1 * Math.cos(lineAngle), y2 - 1 * Math.cos(lineAngle));
       this.ctx.lineTo(arrowLeftX, arrowLeftY);
+      this.ctx.lineTo(botLeftX, botLeftY);
       this.ctx.closePath();
       this.ctx.fillStyle = color;
       this.ctx.fill();
-      this.ctx.lineWidth = 2.4;
-      this.ctx.strokeStyle = activeColor;
-      this.ctx.stroke();
+      // this.ctx.lineWidth = activeColor === 'transparent' ? 4 : 4;
+      // this.ctx.strokeStyle = activeColor;
+      // this.ctx.stroke();
       this.ctx.restore();
     },
     Line(x1, y1, x2, y2, color = '#666', width = 1.2) {

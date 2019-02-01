@@ -1,8 +1,6 @@
 <template>
   <div class="collapse-item" :style="{'--duration': `${duration/1000}s`}">
-    <div class="collapse-item__header" :class="{active: active}" @click="change">
-      <span>{{title}}</span>
-    </div>
+    <div class="collapse-item__header" :class="{active: active}" @click="change">{{title}}</div>
     <div
       class="collapse-item__wrap"
       :class="{active: active}"
@@ -122,7 +120,6 @@ export default {
 <style lang="scss" scoped>
 .collapse-item__header {
   position: relative;
-  display: flex;
   padding: 0 10px;
   align-items: center;
   height: 48px;
@@ -196,11 +193,6 @@ export default {
     border-radius: 10px;
     background: #f0f0f0;
   }
-}
-
-.collapse-item__header-handle{
-  float: right;
-  margin-right: 20px;
 }
 </style>
 

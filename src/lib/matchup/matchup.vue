@@ -76,6 +76,8 @@
           :fullEdition="fullEdition"
           @click="clickLine"
           @delete="deleteLine"
+          @checkLine="cvsCheckLine"
+          @unCheckLine="cvsUnCheckLine"
         />
       </div>
       <div class="right" ref="right" id="right" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
@@ -261,10 +263,6 @@ export default {
     },
     rightData() {
       this.rightDataChange = true;
-    },
-    activeData(val, oldVal) {
-      val.id && this.$emit('checkLine', val.id);
-      oldVal.id && this.$emit('unCheckLine', oldVal.id);
     }
   },
   methods: {
@@ -330,6 +328,15 @@ export default {
     },
     unCheckedLines(ids) {
       this.$refs.canves.unCheckedLines(ids)
+    },
+    clearCheckedLines() {
+      this.$refs.canves.clearCheckedLines()
+    },
+    cvsCheckLine(val) {
+      this.$emit('checkLine', val);
+    },
+    cvsUnCheckLine(val) {
+      this.$emit('unCheckLine', val)
     },
     // 建立连接关系
     join(leftCheckedIds, rightCheckedIds, setAttr) {
