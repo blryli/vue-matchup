@@ -26,11 +26,11 @@ export default {
   methods: {
     // 画布鼠标移动
     move(e) {
-      if (!this.readyLines.length) return;
+      if (!this.lines.length || !this.readyLines.length) return;
       this.inLine(e, 'move')
     },
     check(e) {
-      if (!this.readyLines.length) return;
+      if (!this.lines.length || !this.readyLines.length) return;
       this.lineCheckedIds = [];
       this.inLine(e, 'click')
     },

@@ -2,13 +2,13 @@
   <div id="app">
     <center>
       <p>
-        <button @click="join">连接</button>
-        <button @click="joinLine">连接line</button>
-        <button @click="leftCheckRow">左边选中</button>
-        <button @click="rightCheckRow">右边选中</button>
-        <button @click="checkLines">选中线条</button>
-        <button @click="unCheckedLines">清除选中线条</button>
-        <button @click="clearCheckedLines">清空选中线条</button>
+        <el-button @click="join">连接</el-button>
+        <el-button @click="joinLine">连接line</el-button>
+        <el-button @click="leftCheckRow">左边选中</el-button>
+        <el-button @click="rightCheckRow">右边选中</el-button>
+        <el-button @click="checkLines">选中线条</el-button>
+        <el-button @click="unCheckedLines">清除选中线条</el-button>
+        <el-button @click="clearCheckedLines">清空选中线条</el-button>
       </p>
     </center>
     <vue-matchup
@@ -271,7 +271,7 @@ export default {
           ]
         ]
       },
-      lines: [{leftId: 'L1-1', rightId: 'R1-5'}],
+      lines: [{leftId: 'L1-1', rightId: 'R1-5'}, {leftId: 'L1-3', rightId: 'R1-2'}],
       finishLines: [],
       leftData: [],
       rightData: [],

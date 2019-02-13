@@ -128,10 +128,13 @@ export default {
       this.ctx = this.canvas.getContext("2d");
     },
     // 画线
-    drawLine(e, event) {
+    drawLine() {
       this.ctx &&
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      if (!this.lines.length) return;
+      if (!this.lines.length) {
+        this.readyLines = [];
+        return;
+      };
       this.readyLines = [];
       const leftHeader = this.$parent.$data.leftHeader;
       const rightHeader = this.$parent.$data.rightHeader;

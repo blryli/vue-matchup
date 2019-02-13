@@ -98,16 +98,15 @@ export default {
       index !== -1 && this.clickRow(index);
     },
     clickRow(idx) {
-      const handleRow = this.handleData[idx];
-      handleRow.check = !handleRow.check;
+      this.handleData[idx].check = !this.handleData[idx].check;
       const checkIds = [];
       this.handleData.forEach(d => {
         d.check && checkIds.push(d.id);
       });
       this.$emit("checkChange", checkIds, this.row);
-      handleRow.check
-        ? this.$emit("checkRow", handleRow.id)
-        : this.$emit("unCheckRow", handleRow.id);
+      this.handleData[idx].check
+        ? this.$emit("checkRow", this.handleData[idx].id)
+        : this.$emit("unCheckRow", this.handleData[idx].id);
     },
     clearChecked() {
       this.handleData.forEach(d => {
