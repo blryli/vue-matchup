@@ -1,5 +1,5 @@
 <template>
-  <div class="canves" ref="canves" :style="{left: `-${offset}px`}">
+  <div class="canves" :style="{left: `-${offset}px`}">
     <canvas
       ref="canvas"
       class="canvas"
@@ -9,7 +9,7 @@
       @click="check($event)"
       @dblclick="edit($event)"
     ></canvas>
-    <input class="flows__handle-input" type="text" ref="input" @keyup.delete="deleted(null)">
+    <input class="flows__handle-input" :style="{top: inputTop}" type="text" ref="input" @keyup.delete="deleted(null)">
   </div>
 </template>
 
@@ -50,11 +50,11 @@ export default {
       default: 300
     },
     readonly: Boolean,
-    fullEdition: Boolean,
     activeColor: {
       type: String,
       default: "#139BD4"
-    }
+    },
+    loadFinish: Boolean
   },
   data() {
     return {
@@ -76,6 +76,11 @@ export default {
   computed: {
     lines() {
       return JSON.parse(JSON.stringify(this.value)) || [];
+    },
+    inputTop() {
+      if (!this.lineCheckedId) return `${Math.abs(offset(this.$el).top + this.scrollTop)}px`;
+      const line = this.lines.find(l => l.id === this.lineCheckedId);
+      return line.y1 > line.y2 ? `${line.y2}px` : `${line.y1}px`;
     }
   },
   watch: {
@@ -131,7 +136,7 @@ export default {
     drawLine() {
       this.ctx &&
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      if (!this.lines.length) {
+      if (!this.lines.length || !this.loadFinish) {
         this.readyLines = [];
         return;
       };
@@ -233,8 +238,8 @@ export default {
           y2 < rightHeaderY && (y2 = rightHeaderY);
         }
 
-        line.y1 = y1 - offset(this.$refs.canves).top;
-        line.y2 = y2 - offset(this.$refs.canves).top;
+        line.y1 = y1 - offset(this.$el).top;
+        line.y2 = y2 - offset(this.$el).top;
         this.readyLines.push({
           id: line.id,
           p1: { x: line.x1, y: line.y1 },
@@ -249,7 +254,7 @@ export default {
   mounted() {
     this.$nextTick(() => {
       setTimeout(() => {
-        this.lines.length && this.drawLine();
+        // this.lines.length && this.drawLine();
       }, 350);
     });
   }
@@ -260,7 +265,6 @@ export default {
 .canves {
   position: absolute;
   top: 0;
-  width: 240px;
   z-index: 100;
 }
 .flows__handle-input {

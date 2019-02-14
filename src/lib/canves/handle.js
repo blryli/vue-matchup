@@ -1,4 +1,5 @@
-import { offset } from "../../utils/util";
+import { offset, scroll, allScrollNode } from "../../utils/util";
+import { on, off } from "../../utils/dom";
 
 export default {
   data() {
@@ -6,7 +7,10 @@ export default {
       lineMoveId: null,
       lineCheckedId: null,
       lineCheckedIds: [],
-      readyLines: []
+      readyLines: [],
+      scrollTargets: [],
+      scrollTop: scroll().top,
+      scrollLeft: scroll().left
     }
   },
   watch: {
@@ -27,12 +31,12 @@ export default {
     // 画布鼠标移动
     move(e) {
       if (!this.lines.length || !this.readyLines.length) return;
-      this.inLine(e, 'move')
+      this.inLine(e, 'move');
     },
     check(e) {
       if (!this.lines.length || !this.readyLines.length) return;
       this.lineCheckedIds = [];
-      this.inLine(e, 'click')
+      this.inLine(e, 'click');
     },
     edit() {
       if (!this.lineMoveId) return;
@@ -52,8 +56,8 @@ export default {
     },
     inLine (e, type) {
       // 鼠标点击的坐标
-      const px = e.clientX - offset(this.$refs.canvas).left;
-      const py = e.clientY - offset(this.$refs.canvas).top;
+      const px = e.clientX - offset(this.$refs.canvas).left + this.scrollLeft;
+      const py = e.clientY - offset(this.$refs.canvas).top + this.scrollTop;
 
       // 逐条线确定是否有点中
       const lineOffset = 5; // 可接受（偏移）范围
@@ -145,6 +149,29 @@ export default {
       this.lineCheckedIds = [];
       this.lineCheckedId = null;
       this.drawAllLines();
+    },
+    windowScroll() {
+      this.scrollTop = scroll().top;
+      this.scrollLeft = scroll().left;
+      this.scrollTargets.forEach(d => {
+        this.scrollTop += d.scrollTop;
+        this.scrollLeft += d.scrollLeft;
+      })
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.scrollTargets = allScrollNode(this.$el.parentNode);
+      this.scrollTargets.forEach(d => {
+        on(d, "scroll", this.windowScroll);
+      })
+      on(window, "scroll", this.windowScroll);
+    })
+  },
+  beforeDestroy() {
+    this.scrollTargets.forEach(d => {
+      off(d, "scroll", this.windowScroll);
+    })
+    off(window, "scroll", this.windowScroll);
   }
 }

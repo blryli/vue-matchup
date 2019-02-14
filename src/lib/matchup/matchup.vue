@@ -1,128 +1,84 @@
 <template>
-  <div
-    class="matchup"
-    ref="wrap"
-    :class="{full: fullEdition}"
-    :style="{'min-height': fullEdition ? minHeight : ''}"
-  >
-    <div
-      v-if="fullEdition"
-      class="matchup__header"
-      ref="header"
-      :style="{width: `calc(100% - ${sidebarUseWidth}px)`}"
-    >
-      <div class="matchup__header-handle">
-        <ul>
-          <li @click="join">匹配</li>
-          <li class="hr">|</li>
-          <li>全部匹配</li>
-          <li class="hr">|</li>
-          <li>清空</li>
-          <li ref="dbArrow" class="f-r db-arrow" @click="sidebarWidthChange"></li>
-        </ul>
+  <div class="matchup" ref="matchup">
+    <div class="left" ref="left" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
+      <div class="card">
+        <collapse v-model="leftActiveName" :accordion="collapseAccordion" @change="collapseChange">
+          <collapse-item
+            ref="left-collapse-item"
+            v-for="(d, i) in realLeftData"
+            :key="i"
+            :title="`${showTitle(leftTitle, i)}`"
+            :name="`${i + 1}`"
+            scrollDir="left"
+            :duration="duration"
+          >
+            <r-table
+              :row="i"
+              ref="left-table"
+              :theadData="leftThead"
+              :tbodyData="d"
+              :idFun="leftIdFun"
+              :popover="popover"
+              :enterable="popoverEnterable"
+              :hideDelay="popoverHideDelay"
+              :popoverContentFun="leftPopoverContentFun"
+              pos="L"
+              @checkChange="leftCheckChange"
+              @checkRow="checkRow"
+              @unCheckRow="unCheckRow"
+            ></r-table>
+          </collapse-item>
+        </collapse>
       </div>
     </div>
-    <div
-      class="matchup__body"
-      ref="matchupBody"
-      :style="{width: fullEdition ? `calc(100% - ${sidebarUseWidth}px)` : ''}"
-    >
-      <div class="left" ref="left" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
-        <div class="card">
-          <collapse
-            v-model="leftActiveName"
-            :accordion="collapseAccordion"
-            @change="collapseChange"
+    <div class="center" :style="{width: `${cvsWidth}px`,height: `${height}px`}">
+      <m-canves
+        ref="canves"
+        :width="cvsWidth"
+        :height="height"
+        :value="value"
+        :leftCheckedIds="leftCheckedIds"
+        :rightCheckedIds="rightCheckedIds"
+        :leftActiveName="leftActiveName"
+        :rightActiveName="rightActiveName"
+        :duration="duration"
+        :loadFinish="loadFinish"
+        @delete="deleteLine"
+        @checkLine="cvsCheckLine"
+        @unCheckLine="cvsUnCheckLine"
+      />
+    </div>
+    <div class="right" ref="right" id="right" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
+      <div class="card">
+        <collapse v-model="rightActiveName" :accordion="collapseAccordion" @change="collapseChange">
+          <collapse-item
+            ref="right-collapse-item"
+            v-for="(d, i) in realRightData"
+            :key="i"
+            :title="`${showTitle(rightTitle, i)}`"
+            :name="`${i + 1}`"
+            :duration="duration"
           >
-            <collapse-item
-              v-for="(d, i) in realLeftData"
-              :key="i"
-              :title="`${showTitle(leftTitle, i)}`"
-              :name="`${i + 1}`"
-              scrollDir="left"
-              :duration="duration"
-              :dataChange="leftDataChange"
-            >
-              <r-table
-                :row="i"
-                ref="leftTable"
-                :theadData="leftThead"
-                :tbodyData="d"
-                :idFun="leftIdFun"
-                :popover="popover"
-                :enterable="popoverEnterable"
-                :hideDelay="popoverHideDelay"
-                :popoverContentFun="leftPopoverContentFun"
-                pos="L"
-                @checkChange="leftCheckChange"
-                @checkRow="checkRow"
-                @unCheckRow="unCheckRow"
-              ></r-table>
-            </collapse-item>
-          </collapse>
-        </div>
-      </div>
-      <div class="center" :style="{width: `${cvsWidth}px`}">
-        <m-canves
-          ref="canves"
-          :width="cvsWidth"
-          :height="height"
-          :value="value"
-          :leftCheckedIds="leftCheckedIds"
-          :rightCheckedIds="rightCheckedIds"
-          :leftActiveName="leftActiveName"
-          :rightActiveName="rightActiveName"
-          :duration="duration"
-          :fullEdition="fullEdition"
-          @click="clickLine"
-          @delete="deleteLine"
-          @checkLine="cvsCheckLine"
-          @unCheckLine="cvsUnCheckLine"
-        />
-      </div>
-      <div class="right" ref="right" id="right" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
-        <div class="card">
-          <collapse
-            v-model="rightActiveName"
-            :accordion="collapseAccordion"
-            @change="collapseChange"
-          >
-            <collapse-item
-              v-for="(d, i) in realRightData"
-              :key="i"
-              :title="`${showTitle(rightTitle, i)}`"
-              :name="`${i + 1}`"
-              :duration="duration"
-              :dataChange="rightDataChange"
-            >
-              <r-table
-                v-model="rightChecked"
-                ref="rightTable"
-                :row="i"
-                :theadData="rightThead"
-                :tbodyData="d"
-                :idFun="rightIdFun"
-                :popover="popover"
-                :enterable="popoverEnterable"
-                :hideDelay="popoverHideDelay"
-                :popoverContentFun="rightPopoverContentFun"
-                pos="R"
-                @checkChange="rightCheckChange"
-                @checkRow="checkRow"
-                @unCheckRow="unCheckRow"
-              ></r-table>
-            </collapse-item>
-          </collapse>
-        </div>
+            <r-table
+              v-model="rightChecked"
+              ref="right-table"
+              :row="i"
+              :theadData="rightThead"
+              :tbodyData="d"
+              :idFun="rightIdFun"
+              :popover="popover"
+              :enterable="popoverEnterable"
+              :hideDelay="popoverHideDelay"
+              :popoverContentFun="rightPopoverContentFun"
+              pos="R"
+              @checkChange="rightCheckChange"
+              @checkRow="checkRow"
+              @unCheckRow="unCheckRow"
+            ></r-table>
+          </collapse-item>
+        </collapse>
       </div>
     </div>
-    <m-sidebar
-      v-if="fullEdition"
-      :sidebarWidth="sidebarWidth"
-      :sidebarUseWidth="sidebarUseWidth"
-      :groups="groups"
-      :fullEdition="fullEdition"
-    ></m-sidebar>
   </div>
 </template>
 
@@ -167,18 +123,6 @@ export default {
       type: Number,
       default: 300
     },
-    sidebarWidth: {
-      type: Number,
-      default: 200
-    },
-    minHeight: {
-      type: String,
-      default: "600px"
-    },
-    fullEdition: {
-      type: Boolean,
-      default: false
-    },
     popover: {
       type: Boolean,
       default: false
@@ -201,7 +145,6 @@ export default {
       rightChecked: [],
       cvsWidth: 200,
       height: 200,
-      sidebarUseWidth: this.sidebarWidth,
       leftActiveName: ["1"],
       rightActiveName: ["1"],
       rightBox: [],
@@ -214,40 +157,62 @@ export default {
       rightCheckedIds: [],
       accordion: true,
       activeData: {},
-      leftDataChange: false,
-      rightDataChange: false,
-      ny: 0,
-      rotYINT: null,
-      headerParent: [],
+      headerParent: []
     };
   },
   computed: {
     lines() {
       return this.value;
+    },
+    realLeftData() {
+      return Array.isArray(this.leftData[0]) ? this.leftData : [this.leftData];
+    },
+    realRightData() {
+      return Array.isArray(this.rightData[0])
+        ? this.rightData
+        : [this.rightData];
+    },
+    loadFinish() {
+      return !!(this.leftData.length && this.rightData.length);
     }
   },
   watch: {
-    leftData() {
-      this.leftDataChange = true;
+    lines(val) {
+      val && this.loadFinish && this.drawLine();
     },
-    rightData() {
+    leftData(val) {
+      this.leftDataChange = true;
+      val && this.loadFinish && this.init();
+    },
+    rightData(val) {
       this.rightDataChange = true;
+      val && this.loadFinish && this.init();
     }
   },
   methods: {
     init() {
+      console.log('init')
       this.$nextTick(() => {
-        this.$refs.leftTable.forEach(d => {
+        this.$refs["left-collapse-item"].forEach(d => {
           d.init();
-        })
-        this.$refs.rightTable.forEach(d => {
+        });;
+        this.$refs["right-collapse-item"].forEach(d => {
           d.init();
-        })
+        });;
+        this.$refs["left-table"].forEach(d => {
+          d.init();
+        });
+        this.$refs["right-table"].forEach(d => {
+          d.init();
+        });
         this.setHeight();
         setTimeout(() => {
           this.drawLine();
-        }, 0)
-      })
+        }, 0);
+      });
+    },
+    drawLine() {
+      this.$refs.canves.drawLine();
     },
     showTitle(title, i) {
       if (typeof title === "string") {
@@ -256,7 +221,7 @@ export default {
         return title[i] || title[0];
       }
     },
-    scrollChange(event, index) {
+    scrollChange(event) {
       if (!this.value.length) return;
       this.drawLine();
     },
@@ -269,11 +234,9 @@ export default {
       }
       this.setHeight();
     },
-    clickLine(val) {
-      this.activeData = val;
-    },
     // 调整canves高度
     setHeight() {
+      if (!this.lines.length || !this.loadFinish) return;
       const timer = setInterval(() => {
         const left = this.$refs.left;
         const right = this.$refs.right;
@@ -289,71 +252,24 @@ export default {
         clearTimeout(timer);
       }, this.duration);
     },
-    windowScroll() {
-      if (!this.fullEdition || !this.$refs.header || !this.$refs.wrap) return;
-      let scrollTop = scroll().top;
-      if (scrollTop > offset(this.$refs.wrap).top) {
-        this.$refs.header.style.top = this.$refs.sidebar.style.top =
-          scrollTop - offset(this.$refs.wrap).top + "px";
-      } else {
-        if (this.$refs.header.style.top !== 0) {
-          this.$refs.header.style.top = 0;
-          this.$refs.sidebar.style.top = 0;
-        }
-      }
-    },
-    sidebarWidthChange() {
-      this.sidebarUseWidth =
-        this.sidebarUseWidth === 10 ? this.sidebarWidth : 10;
-      clearInterval(this.rotYINT);
-      this.rotYINT = setInterval(() => {
-        this.startYRotate(this.$refs.dbArrow);
-      }, 10);
-    },
-    startYRotate(y) {
-      this.ny = this.ny + 5;
-      y.style.transform = `rotateY(${this.ny}deg)`;
-      y.style.webkitTransform = `rotateY(${this.ny}deg)`;
-      y.style.OTransform = `rotateY(${this.ny}deg)`;
-      y.style.MozTransform = `rotateY(${this.ny}deg)`;
-      if (this.ny == 180 || this.ny >= 360) {
-        clearInterval(this.rotYINT);
-        if (this.ny >= 360) {
-          this.ny = 0;
-        }
-      }
-    },
-    headerOnScroll() {
-      let parent = this.$refs.header.parentNode;
-      while (parent !== document.body) {
-        if (parent.scrollHeight !== parent.offsetHeight) {
-          this.headerParent.push(parent);
-        }
-        parent = parent.parentNode;
-      }
-      this.headerParent.forEach(d => {
-        on(d, "scroll", this.windowScroll);
-      });
-      on(window, "scroll", this.windowScroll);
-    },
     sizeChange() {
       this.drawLine();
     }
   },
   mounted() {
     this.$nextTick(() => {
-      this.leftHeader = Array.from(this.$refs.left.querySelectorAll(
-        ".collapse-item__header"
-      ));
-      this.leftContent = Array.from(this.$refs.left.querySelectorAll(
-        ".collapse-item__wrap"
-      ));
-      this.rightHeader = Array.from(this.$refs.right.querySelectorAll(
-        ".collapse-item__header"
-      ));
-      this.rightContent = Array.from(this.$refs.right.querySelectorAll(
-        ".collapse-item__wrap"
-      ));
+      this.leftHeader = Array.from(
+        this.$refs.left.querySelectorAll(".collapse-item__header")
+      );
+      this.leftContent = Array.from(
+        this.$refs.left.querySelectorAll(".collapse-item__wrap")
+      );
+      this.rightHeader = Array.from(
+        this.$refs.right.querySelectorAll(".collapse-item__header")
+      );
+      this.rightContent = Array.from(
+        this.$refs.right.querySelectorAll(".collapse-item__wrap")
+      );
       this.leftHeader.forEach(d => {
         this.leftChecked.push([]);
       });
@@ -364,15 +280,13 @@ export default {
         this.setHeight();
       }, this.duration + 1);
 
-      this.leftContent.forEach((d, i) => {
-        on(d, "scroll", this.scrollChange, i);
+      this.leftContent.forEach(d => {
+        on(d, "scroll", this.scrollChange);
       });
-      this.rightContent.forEach((d, i) => {
-        on(d, "scroll", this.scrollChange, i);
+      this.rightContent.forEach(d => {
+        on(d, "scroll", this.scrollChange);
       });
       on(window, "resize", this.sizeChange);
-
-      this.fullEdition && this.headerOnScroll();
     });
   },
   beforeDestroy() {
@@ -382,17 +296,37 @@ export default {
     this.rightContent.forEach((d, i) => {
       off(d, "scroll", this.scrollChange, i);
     });
-    if (this.fullEdition) {
-      this.headerParent.forEach(d => {
-        off(d, "scroll", this.windowScroll);
-      });
-      off(window, "scroll", this.windowScroll);
-    }
     off(window, "resize", this.sizeChange);
   }
 };
 </script>
 
 <style lang="scss">
-@import './matchup.scss'
+.matchup {
+  width: 100%;
+}
+.center {
+  position: relative;
+  height: 100%;
+  min-height: 100px;
+  overflow: hidden;
+}
+.left,
+.center,
+.right {
+  display: inline-block;
+}
+.left,
+.right {
+  vertical-align: top;
+}
+.card {
+  border-radius: 4px;
+  border: 1px solid #dfe2e9;
+  background-color: #fff;
+  color: #303133;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+  overflow: hidden;
+}
 </style>

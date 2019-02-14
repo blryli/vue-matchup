@@ -2,8 +2,8 @@
   <div id="app">
     <center>
       <p>
-        <el-button @click="join">连接</el-button>
-        <el-button @click="joinLine">连接line</el-button>
+        <el-button @click="link">连接</el-button>
+        <el-button @click="linkLine">连接line</el-button>
         <el-button @click="leftCheckRow">左边选中</el-button>
         <el-button @click="rightCheckRow">右边选中</el-button>
         <el-button @click="checkLines">选中线条</el-button>
@@ -11,25 +11,28 @@
         <el-button @click="clearCheckedLines">清空选中线条</el-button>
       </p>
     </center>
-    <vue-matchup
-      ref="matchup"
-      v-model="lines"
-      :leftData="batchData.items"
-      :rightData="batchData.decItems"
-      :leftThead="leftThead"
-      :rightThead="rightThead"
-      :leftPopoverContentFun="leftPopoverContentFun"
-      :rightPopoverContentFun="rightPopoverContentFun"
-      leftTitle="清单"
-      :rightTitle="['报关1','报关2','报关3']"
-      @checkRow="checkRow"
-      @unCheckRow="unCheckRow"
-      @checkLine="checkLine"
-      @unCheckLine="unCheckLine"
-      @leftCheckChange="leftCheckChange"
-      @rightCheckChange="rightCheckChange"
-      @delete="deleteFun"
-    ></vue-matchup>
+    <div class="box">
+      <vue-matchup
+        popover
+        ref="matchup"
+        v-model="lines"
+        :leftData="items"
+        :rightData="decItems"
+        :leftThead="leftThead"
+        :rightThead="rightThead"
+        :leftPopoverContentFun="leftPopoverContentFun"
+        :rightPopoverContentFun="rightPopoverContentFun"
+        leftTitle="清单"
+        :rightTitle="['报关1','报关2','报关3']"
+        @checkRow="checkRow"
+        @unCheckRow="unCheckRow"
+        @checkLine="checkLine"
+        @unCheckLine="unCheckLine"
+        @leftCheckChange="leftCheckChange"
+        @rightCheckChange="rightCheckChange"
+        @delete="deleteFun"
+      ></vue-matchup>
+    </div>
     <p>lines: {{lines}}</p>
   </div>
 </template>
@@ -43,235 +46,237 @@ export default {
       rightIdFun: (row, index) => `R${index}-${row.lineNo}`,
       leftPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, [data.lineNo])
+          this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, [data.lineNo])
         ]);
       },
       rightPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("span", {}, ["message"]),
-          this.$createElement("span", {}, [data])
+          this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, [data])
         ]);
       },
-      batchData: {
-        batchNo: "123",
-        items: [
+      items: [
+        {
+          lineNo: 1,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "1, 2"
+        },
+        {
+          lineNo: 2,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "4"
+        },
+        {
+          lineNo: 3,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "4"
+        },
+        {
+          lineNo: 4,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "5"
+        },
+        {
+          lineNo: 5,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "6, 7"
+        },
+        {
+          lineNo: 6,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "6, 7"
+        },
+        {
+          lineNo: 7,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "5"
+        },
+        {
+          lineNo: 8,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "5"
+        },
+        {
+          lineNo: 9,
+          sku: null,
+          qty: 100,
+          unit: "PCS",
+          nw: { weight: 100, unit: "KG" },
+          gw: { weight: 120, unit: "KG" },
+          to: "5"
+        }
+      ],
+      decItems: [
+        [
           {
             lineNo: 1,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "1, 2"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 2,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "4"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 3,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "4"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 4,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "5"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 5,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "6, 7"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 6,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "6, 7"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           },
           {
             lineNo: 7,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "5"
-          },
-          {
-            lineNo: 8,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "5"
-          },
-          {
-            lineNo: 9,
-            sku: null,
-            qty: 100,
-            unit: "PCS",
-            nw: { weight: 100, unit: "KG" },
-            gw: { weight: 120, unit: "KG" },
-            to: "5"
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
           }
         ],
-        decItems: [
-          [
-            {
-              lineNo: 1,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 2,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 3,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 4,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 5,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 6,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 7,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            }
-          ],
-          [
-            {
-              lineNo: 1,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 2,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 3,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 4,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 5,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 6,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            },
-            {
-              lineNo: 7,
-              customsLedgerId: null,
-              customsLedgerLineNo: 0,
-              hsCode: "0101000100",
-              name: null,
-              qty1: 100,
-              unit1: "KG"
-            }
-          ]
+        [
+          {
+            lineNo: 1,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 2,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 3,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 4,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 5,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 6,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          },
+          {
+            lineNo: 7,
+            customsLedgerId: null,
+            customsLedgerLineNo: 0,
+            hsCode: "0101000100",
+            name: null,
+            qty1: 100,
+            unit1: "KG"
+          }
         ]
-      },
-      lines: [{leftId: 'L1-1', rightId: 'R1-5'}, {leftId: 'L1-3', rightId: 'R1-2'}],
+      ],
+      lines: [
+        { leftId: "L1-1", rightId: "R1-5" },
+        { leftId: "L1-3", rightId: "R1-2" }
+      ],
       finishLines: [],
       leftData: [],
       rightData: [],
@@ -306,8 +311,7 @@ export default {
           title: "单位",
           props: "unit1"
         }
-      ],
-      decItems: []
+      ]
     };
   },
   methods: {
@@ -320,12 +324,16 @@ export default {
       this.$refs.matchup.rightCheckRow("R1-3");
     },
     // 连接的方法
-    join() {
-      this.$refs.matchup.join();
+    link() {
+      this.$refs.matchup.link();
     },
-    joinLine() {
-      this.$refs.matchup.join(['L1-1'],['R1-3'], line => line.color = 'red');
-      this.$refs.matchup.join(['L1-2','L1-3'],['R1-4'], line => line.color = 'red');
+    linkLine() {
+      this.$refs.matchup.link(["L1-1"], ["R1-3"], line => (line.color = "red"));
+      this.$refs.matchup.link(
+        ["L1-2", "L1-3"],
+        ["R1-4"],
+        line => (line.color = "red")
+      );
     },
     // 选中线的方法
     checkLines() {
@@ -338,10 +346,6 @@ export default {
     // 清空选中线的方法
     clearCheckedLines() {
       this.$refs.matchup.clearCheckedLines();
-    },
-    // 设置线color的方法
-    setColor(val) {
-      this.$refs.matchup.setColor(val);
     },
     // 选中行的回调
     checkRow(id) {
@@ -385,6 +389,13 @@ export default {
 <style lang="scss">
 .collapse-item__wrap {
   max-height: 200px;
+}
+#app {
+  height: 600px;
+  overflow: auto;
+}
+.box {
+  height: 800px;
 }
 </style>
 

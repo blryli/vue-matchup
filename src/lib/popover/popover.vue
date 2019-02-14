@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { offset, scroll, generateId } from "../../utils/util";
+import { offset, scroll, allScrollNode } from "../../utils/util";
 import { on, off, removeBody } from "../../utils/dom";
 
 export default {
@@ -60,9 +60,6 @@ export default {
     };
   },
   computed: {
-    id() {
-      return `${generateId()}`;
-    },
     effectClass() {
       let effect = this.effect ? `is-${this.effect}` : "is-light";
       effect += ` ${this.popoverClass}`;
@@ -140,6 +137,12 @@ export default {
     }
   },
   methods: {
+    init() {
+      this.scrollTargets = allScrollNode(this.$el.parentNode);
+      this.scrollTargets.forEach(d => {
+        on(d, "scroll", this.windowScroll);
+      })
+    },
     popoverAddedBody() {
       document.body.appendChild(this.$refs.popover)
       this.addedBody = true;
@@ -176,18 +179,18 @@ export default {
           break;
       }
       let popoverLeft = this.position.center - popover.offsetWidth / 2;
-      const body = this.matchup.$refs.matchupBody;
-      const bodyLeft = offset(body).left;
-      const bodyRight = bodyLeft + body.offsetWidth;
+      const matchup = this.matchup.$refs.matchup;
+      const matchupLeft = offset(matchup).left;
+      const matchupRight = matchupLeft + matchup.offsetWidth;
       if (this.pos === 'L') {
-        popoverLeft < bodyLeft && (popoverLeft = bodyLeft)
+        popoverLeft < matchupLeft && (popoverLeft = matchupLeft)
       } else {
-        popoverLeft + popover.offsetWidth > bodyRight && (popoverLeft = bodyRight - popover.offsetWidth)
+        popoverLeft + popover.offsetWidth > matchupRight && (popoverLeft = matchupRight - popover.offsetWidth)
       }
-      arrow.style.top = this.scrollTop ? arrowTop - this.scrollTop + "px" : arrowTop + "px";
+      arrow.style.top = arrowTop - this.scrollTop + "px";
       arrow.style.left = this.position.center + "px";
-      popover.style.top = this.scrollTop ? popoverTop - this.scrollTop + "px" : popoverTop + "px";
-      bg.style.top = this.scrollTop ? bgTop - this.scrollTop + 'px' : bgTop + 'px';
+      popover.style.top = popoverTop - this.scrollTop + "px";
+      bg.style.top = bgTop - this.scrollTop + 'px';
       bg.style.left = popover.style.left = popoverLeft + "px";
       bg.style.width = popover.offsetWidth + "px";
     },
@@ -223,22 +226,9 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      let parent = this.$el.parentNode;
-      while (parent !== document.body) {
-        if (parent.scrollHeight !== parent.offsetHeight) {
-          this.scrollTargets.push(parent);
-          on(parent, "scroll", this.windowScroll);
-        }
-        parent = parent.parentNode;
-      }
-
+      this.init();
       on(window, "scroll", this.windowScroll);
-      
-      if (!this.$refs.popover) {
-        return console.error(
-          "Couldn't find popover ref in your component that uses popoverMixin."
-        );
-      }
+      this.windowScroll();
     })
   },
   beforeDestroy() {

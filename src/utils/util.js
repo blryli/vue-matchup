@@ -8,7 +8,7 @@ export const generateId = function () {
   return Math.floor(Math.random() * 10000);
 };
 
-export const offset = function(target) {
+export const offset = function (target) {
   if (!target || !target.offsetParent) return false;
   let top = 0;
   let left = 0;
@@ -23,20 +23,31 @@ export const offset = function(target) {
   };
 }
 
-export const scroll = function() {
-  if (window.pageYOffset != null){
-    return{
-      left:window.pageXOffset,
-      top:window.pageYOffset
+export const scroll = function () {
+  if (window.pageYOffset != null) {
+    return {
+      left: window.pageXOffset,
+      top: window.pageYOffset
     }
-  }else if (document.compatMode == 'CSS1Compat'){
-    return{
-      left:document.documentElement.scrollLeft,
-      top:document.documentElement.scrollTop
+  } else if (document.compatMode == 'CSS1Compat') {
+    return {
+      left: document.documentElement.scrollLeft,
+      top: document.documentElement.scrollTop
     }
   }
-  return{
-    left:document.body.scrollLeft,
-    top:document.body.scrollTop
+  return {
+    left: document.body.scrollLeft,
+    top: document.body.scrollTop
   }
+}
+
+export const allScrollNode = function (parent) {
+  let hasScrollDom = [];
+  while (parent !== document.body) {
+    if (parent.scrollHeight - 4 > parent.clientHeight) {
+      hasScrollDom.push(parent);
+    }
+    parent = parent.parentNode;
+  }
+  return hasScrollDom;
 }

@@ -5,15 +5,15 @@ const isServer = Vue.prototype.$isServer;
 // 用来绑定事件的方法，它是一个自执行的函数，会根据是否运行于服务器和是否支持addEventListener来返回一个function
 export const on = (function () {
   if (!isServer && document.addEventListener) {
-    return function (element, event, handler, index) {
+    return function (element, event, handler) {
       if (element && event && handler) {
-        element.addEventListener(event, function(e) { handler(e, index) }, false)
+        element.addEventListener(event, function(e) { handler(e) }, false)
       }
     }
   } else {
     return function (element, event, handler, index) {
       if (element && event && handler) {
-        element.attachEvent('on' + event, function(e) { handler(e, index) })
+        element.attachEvent('on' + event, function(e) { handler(e) })
       }
     }
   }

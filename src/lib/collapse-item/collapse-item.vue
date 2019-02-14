@@ -31,8 +31,7 @@ export default {
     duration: {
       type: Number,
       default: 300
-    },
-    dataChange: Boolean
+    }
   },
   computed: {
     activeName() {
@@ -45,9 +44,6 @@ export default {
   watch: {
     activeName(val) {
       this.accordion && `${val}` !== `${this.name}` && (this.active = false);
-    },
-    dataChange() {
-      this.setContentHeight();
     }
   },
   data() {
@@ -92,7 +88,7 @@ export default {
         }
       }
     },
-    setContentHeight() {
+    init() {
       this.$refs.content.style.height = "auto";
       this.height = this.$refs.content.offsetHeight;
       this.$refs.content.removeAttribute("style");
@@ -100,7 +96,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.setContentHeight();
+      this.init();
 
       !this.accordion &&
         this.activeName &&

@@ -16,7 +16,7 @@
           class="table__row"
           v-for="(da, idx) in tbodyData"
           :key="idx"
-          :class="{active: handleData[idx].check}"
+          :class="{active: handleData.length && handleData[idx].check}"
           @click="clickRow(idx)"
           @mouseenter="mouseenter($event, da, handleData[idx].id)"
           @mouseleave="mouseleave"
@@ -32,6 +32,7 @@
     </table>
     <vue-popover
       v-if="popover"
+      ref="popover"
       v-model="mouseenterId"
       :position="position"
       :data="popoverContent"
@@ -76,14 +77,6 @@ export default {
       showBg: false
     };
   },
-  created() {
-    this.tbodyData.length && this.init();
-  },
-  watch: {
-    tbodyData(val) {
-      this.init();
-    }
-  },
   methods: {
     init() {
       this.tbodyData.forEach((d, i) => {
@@ -92,6 +85,7 @@ export default {
           `${this.pos}${this.row + 1}-${i + 1}`;
         this.handleData.push({ id: id, check: false });
       });
+      this.popover && this.$refs.popover.init();
     },
     checkRow(id) {
       const index = this.handleData.findIndex(d => d.id === id);
@@ -167,6 +161,11 @@ export default {
       });
       return value;
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.init();
+    });
   }
 };
 </script>
