@@ -9,6 +9,14 @@
         <el-button @click="checkLines">选中线条</el-button>
         <el-button @click="unCheckedLines">清除选中线条</el-button>
         <el-button @click="clearCheckedLines">清空选中线条</el-button>
+        <el-popover
+    placement="top-start"
+    title="标题"
+    width="200"
+    trigger="hover"
+    content="这是一段内容,这是一段内容,这是一段内容,这是一段内容。">
+    <el-button slot="reference">hover 激活</el-button>
+  </el-popover>
       </p>
     </center>
     <div class="box">
@@ -399,7 +407,7 @@ export default {
   // max-height: 200px;
 }
 #app {
-  // height: 600px;
+  height: 600px;
   overflow: auto;
 }
 .box {

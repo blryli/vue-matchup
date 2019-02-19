@@ -42,11 +42,11 @@ export const scroll = function () {
 }
 
 export const allScrollNode = function (parent) {
-  let hasScrollDom = [];
+  let hasScrollDom = [document.body];
   while (parent !== document.body) {
-    if (parent.scrollHeight - 4 > parent.clientHeight) {
+    // if (parent.scrollHeight - 4 > parent.clientHeight) {
       hasScrollDom.push(parent);
-    }
+    // }
     parent = parent.parentNode;
   }
   return hasScrollDom;

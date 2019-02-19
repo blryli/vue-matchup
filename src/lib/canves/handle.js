@@ -26,12 +26,20 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    matchup() {
+      let parent = this.$parent;
+      let parentName = parent.$options.name;
+      while (parentName !== "vue-matchup") {
+        parent = parent.$parent;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    }
+  },
   methods: {
     init() {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext("2d");
-      this.scrollTargets = allScrollNode(this.$el.parentNode);
+      this.scrollTargets = allScrollNode(this.matchup.$el.parentNode);
       this.scrollTargets.forEach(d => {
         on(d, "scroll", this.windowScroll);
       })
@@ -169,6 +177,8 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      this.canvas = this.$refs.canvas;
+      this.ctx = this.canvas.getContext("2d");
       on(window, "scroll", this.windowScroll);
     })
   },

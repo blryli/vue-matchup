@@ -138,7 +138,8 @@ export default {
   },
   methods: {
     init() {
-      this.scrollTargets = allScrollNode(this.$el.parentNode);
+      this.scrollTargets = allScrollNode(this.matchup.$el.parentNode);
+      this.scrollTargets.push(this.$el.parentNode.parentNode);
       this.scrollTargets.forEach(d => {
         on(d, "scroll", this.windowScroll);
       })
@@ -227,12 +228,10 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.init();
-      on(window, "scroll", this.windowScroll);
       this.windowScroll();
     })
   },
   beforeDestroy() {
-    off(window, "scroll", this.windowScroll);
     this.scrollTargets.forEach(d => {
       off(d, "scroll", this.windowScroll);
     })
