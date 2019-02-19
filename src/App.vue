@@ -48,6 +48,7 @@ export default {
         return this.$createElement("div", {}, [
           this.$createElement("p", {}, ["message"]),
           this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, ["message"]),
           this.$createElement("p", {}, [data.lineNo])
         ]);
       },
@@ -55,92 +56,11 @@ export default {
         return this.$createElement("div", {}, [
           this.$createElement("p", {}, ["message"]),
           this.$createElement("p", {}, ["message"]),
+          this.$createElement("p", {}, ["message"]),
           this.$createElement("p", {}, [data])
         ]);
       },
-      items: [
-        {
-          lineNo: 1,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "1, 2"
-        },
-        {
-          lineNo: 2,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "4"
-        },
-        {
-          lineNo: 3,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "4"
-        },
-        {
-          lineNo: 4,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "5"
-        },
-        {
-          lineNo: 5,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "6, 7"
-        },
-        {
-          lineNo: 6,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "6, 7"
-        },
-        {
-          lineNo: 7,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "5"
-        },
-        {
-          lineNo: 8,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "5"
-        },
-        {
-          lineNo: 9,
-          sku: null,
-          qty: 100,
-          unit: "PCS",
-          nw: { weight: 100, unit: "KG" },
-          gw: { weight: 120, unit: "KG" },
-          to: "5"
-        }
-      ],
+      items: [],
       decItems: [
         [
           {
@@ -275,7 +195,10 @@ export default {
       ],
       lines: [
         { leftId: "L1-1", rightId: "R1-5" },
-        { leftId: "L1-3", rightId: "R1-2" }
+        { leftId: "L1-3", rightId: "R1-2" },
+        { leftId: "L1-9", rightId: "R1-1" },
+        { leftId: "L1-2", rightId: "R2-1" },
+        { leftId: "L1-2", rightId: "R2-7" }
       ],
       finishLines: [],
       leftData: [],
@@ -381,6 +304,91 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.$refs.matchup.drawLine();
+      setTimeout(() => {
+        this.items = [
+          {
+            lineNo: 1,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "1, 2"
+          },
+          {
+            lineNo: 2,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "4"
+          },
+          {
+            lineNo: 3,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "4"
+          },
+          {
+            lineNo: 4,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "5"
+          },
+          {
+            lineNo: 5,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "6, 7"
+          },
+          {
+            lineNo: 6,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "6, 7"
+          },
+          {
+            lineNo: 7,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "5"
+          },
+          {
+            lineNo: 8,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "5"
+          },
+          {
+            lineNo: 9,
+            sku: null,
+            qty: 100,
+            unit: "PCS",
+            nw: { weight: 100, unit: "KG" },
+            gw: { weight: 120, unit: "KG" },
+            to: "5"
+          }
+        ];
+      }, 2000);
     });
   }
 };
@@ -388,14 +396,14 @@ export default {
 
 <style lang="scss">
 .collapse-item__wrap {
-  max-height: 200px;
+  // max-height: 200px;
 }
 #app {
-  height: 600px;
+  // height: 600px;
   overflow: auto;
 }
 .box {
-  height: 800px;
+  // height: 800px;
 }
 </style>
 

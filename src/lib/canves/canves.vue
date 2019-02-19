@@ -9,7 +9,13 @@
       @click="check($event)"
       @dblclick="edit($event)"
     ></canvas>
-    <input class="flows__handle-input" :style="{top: inputTop}" type="text" ref="input" @keyup.delete="deleted(null)">
+    <input
+      class="flows__handle-input"
+      :style="inputStyle"
+      type="text"
+      ref="input"
+      @keyup.delete="deleted(null)"
+    >
   </div>
 </template>
 
@@ -39,8 +45,8 @@ export default {
       type: Array,
       default: () => []
     },
-    leftActiveName: [Array, String],
-    rightActiveName: [Array, String],
+    leftActiveName: [Array],
+    rightActiveName: [Array],
     height: {
       type: Number,
       default: 50
@@ -49,7 +55,6 @@ export default {
       type: Number,
       default: 300
     },
-    readonly: Boolean,
     activeColor: {
       type: String,
       default: "#139BD4"
@@ -62,75 +67,68 @@ export default {
       ctx: "",
       leftActiveNameOld: JSON.parse(JSON.stringify(this.leftActiveName)),
       leftCloseName: null,
+      leftOpenName: null,
       rightActiveNameOld: JSON.parse(JSON.stringify(this.rightActiveName)),
       rightCloseName: null,
+      rightOpenName: null,
       drawNum: 0,
       groupsId: 0
     };
   },
   created() {
     this.$nextTick(() => {
-      this.init();
+      this.canvas = this.$refs.canvas;
+      this.ctx = this.canvas.getContext("2d");
     });
   },
   computed: {
     lines() {
       return JSON.parse(JSON.stringify(this.value)) || [];
     },
-    inputTop() {
-      if (!this.lineCheckedId) return `${Math.abs(offset(this.$el).top + this.scrollTop)}px`;
+    inputStyle() {
+      let style = {};
+      if (!this.lineCheckedId) {
+        style.cssText = "display:none";
+        return style;
+      }
       const line = this.lines.find(l => l.id === this.lineCheckedId);
-      return line.y1 > line.y2 ? `${line.y2}px` : `${line.y1}px`;
+      const top = line.y1 > line.y2 ? `${line.y2}px` : `${line.y1}px`;
+      style.cssText = `top:${top};display:block;`;
+      return style;
     }
   },
   watch: {
-    leftActiveName(newVal, oldVal) {
-      if (this.readonly) return;
-      this.rightCloseName = null;
-      if (typeof newVal === "string") {
-        this.leftCloseName = `${oldVal}`;
-      } else if (
-        newVal &&
-        Array.isArray(newVal) &&
-        Array.isArray(this.leftActiveNameOld)
-      ) {
-        this.leftActiveNameOld.forEach(old => {
-          if (!newVal.find(newV => `${newV}` === `${old}`)) {
-            this.leftCloseName = `${old}`;
-          }
-        });
-        newVal.length > this.leftActiveNameOld.length &&
-          (this.leftCloseName = null);
-        this.leftActiveNameOld = JSON.parse(JSON.stringify(newVal));
-      }
+    leftActiveName(newVal) {
+      this.leftOpenName = newVal.filter(
+        newV => !this.leftActiveNameOld.find(old => old === newV)
+      )[0];
+      this.leftCloseName = this.leftActiveNameOld.filter(
+        old => !newVal.find(newV => old === newV)
+      )[0];
+      this.rightCloseName && (this.rightCloseName = null);
+      this.rightOpenName && (this.rightOpenName = null);
+      this.leftActiveNameOld = JSON.parse(JSON.stringify(newVal));
       this.drawNum = 0;
     },
-    rightActiveName(newVal, oldVal) {
-      if (this.readonly) return;
-      this.leftCloseName = null;
-      if (typeof newVal === "string") {
-        this.rightCloseName = `${oldVal}`;
-      } else if (
-        newVal &&
-        Array.isArray(newVal) &&
-        Array.isArray(this.rightActiveNameOld)
-      ) {
-        this.rightActiveNameOld.forEach(old => {
-          if (!newVal.find(newV => `${newV}` === `${old}`)) {
-            this.rightCloseName = `${old}`;
-          }
-        });
-        newVal.length > this.rightActiveNameOld.length &&
-          (this.rightCloseName = null);
-        this.rightActiveNameOld = JSON.parse(JSON.stringify(newVal));
-      }
+    rightActiveName(newVal) {
+      this.rightOpenName = newVal.filter(
+        newV => !this.rightActiveNameOld.find(old => old === newV)
+      )[0];
+      this.rightCloseName = this.rightActiveNameOld.filter(
+        old => !newVal.find(newV => old === newV)
+      )[0];
+      this.leftOpenName && (this.leftOpenName = null);
+      this.leftCloseName && (this.leftCloseName = null);
+      this.rightActiveNameOld = JSON.parse(JSON.stringify(newVal));
       this.drawNum = 0;
     }
   },
   methods: {
-    init() {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext("2d");
+    clearActiveName() {
+      this.rightCloseName && (this.rightCloseName = null);
+      this.rightOpenName && (this.rightOpenName = null);
+      this.leftOpenName && (this.leftOpenName = null);
+      this.leftCloseName && (this.leftCloseName = null);
     },
     // 画线
     drawLine() {
@@ -139,7 +137,7 @@ export default {
       if (!this.lines.length || !this.loadFinish) {
         this.readyLines = [];
         return;
-      };
+      }
       this.readyLines = [];
       const leftHeader = this.$parent.$data.leftHeader;
       const rightHeader = this.$parent.$data.rightHeader;
@@ -159,83 +157,101 @@ export default {
           offset(leftItem).top +
           leftItem.offsetHeight / 2 -
           leftContent[leftIndex].scrollTop;
+        const gY1 = y1;
         let y2 =
           offset(rightItem).top +
           rightItem.offsetHeight / 2 -
           rightContent[rightIndex].scrollTop;
+        const gY2 = y2;
 
         // left y1 坐标
-        if (
-          (typeof this.leftActiveName === "string" &&
-            parseInt(this.leftActiveName) - 1 === leftIndex) ||
-          (this.leftActiveName &&
-            (Array.isArray(this.leftActiveName) &&
-              this.leftActiveName.find(d => parseInt(d) - 1 === leftIndex)))
-        ) {
-          // 展开状态
-          const topY = offset(leftContent[leftIndex]).top;
-          const botY =
-            offset(leftContent[leftIndex]).top +
-            leftContent[leftIndex].offsetHeight;
-          if (y1 < topY) {
-            y1 = topY;
-          } else if (y1 > botY) {
-            y1 = botY;
+        if (this.leftActiveName.find(d => parseInt(d) - 1 === leftIndex)) {
+          // 当前展开
+          if (leftIndex === this.leftOpenName - 1) {
+            this.drawNum++;
+            const leftHeaderY =
+              offset(leftHeader[leftIndex]).top +
+              leftHeader[leftIndex].offsetHeight / 2;
+            const leftOffsetY = y1 - leftHeaderY;
+            const speed = leftOffsetY / (this.duration / 6);
+            y1 = leftHeaderY;
+            y1 += this.drawNum * speed;
+            y1 > gY1 && (y1 = gY1);
+          } else {
+            // 已展开状态
+            const topY = offset(leftContent[leftIndex]).top;
+            const botY =
+              offset(leftContent[leftIndex]).top +
+              leftContent[leftIndex].offsetHeight;
+            if (y1 < topY) {
+              y1 = topY;
+            } else if (y1 > botY) {
+              y1 = botY;
+            }
           }
         } else {
-          // 已收起状态
-          leftIndex !== this.leftCloseName - 1 &&
-            (y1 =
+          // left 当前收起
+          if (leftIndex === this.leftCloseName - 1) {
+            this.drawNum++;
+            const leftHeaderY =
               offset(leftHeader[leftIndex]).top +
-              leftHeader[leftIndex].offsetHeight / 2);
-        }
-        // left 当前收起
-        if (leftIndex === this.leftCloseName - 1) {
-          this.drawNum++;
-          const leftHeaderY =
-            offset(leftHeader[leftIndex]).top +
-            leftHeader[leftIndex].offsetHeight / 2;
-          const leftOffsetY = y1 - leftHeaderY;
-          const speed = leftOffsetY / (this.duration / 12);
-          y1 > leftHeaderY && (y1 -= this.drawNum * speed);
-          y1 < leftHeaderY && (y1 = leftHeaderY);
+              leftHeader[leftIndex].offsetHeight / 2;
+            const leftOffsetY = y1 - leftHeaderY;
+            const speed = leftOffsetY / (this.duration / 6);
+            y1 > leftHeaderY && (y1 -= this.drawNum * speed);
+            y1 < leftHeaderY && (y1 = leftHeaderY);
+          } else {
+            // 已收起状态
+            leftIndex !== this.leftCloseName - 1 &&
+              (y1 =
+                offset(leftHeader[leftIndex]).top +
+                leftHeader[leftIndex].offsetHeight / 2);
+          }
         }
 
         // right y2 坐标
-        if (
-          (typeof this.rightActiveName === "string" &&
-            parseInt(this.rightActiveName) - 1 === rightIndex) ||
-          (this.rightActiveName &&
-            (Array.isArray(this.rightActiveName) &&
-              this.rightActiveName.find(d => parseInt(d) - 1 === rightIndex)))
-        ) {
-          // 展开状态
-          const topY = offset(rightContent[rightIndex]).top;
-          const botY =
-            offset(rightContent[rightIndex]).top +
-            rightContent[rightIndex].offsetHeight;
-          if (y2 < topY) {
-            y2 = topY;
-          } else if (y2 > botY) {
-            y2 = botY;
+        if (this.rightActiveName.find(d => parseInt(d) - 1 === rightIndex)) {
+          // 当前展开
+          if (rightIndex === this.rightOpenName - 1) {
+            this.drawNum++;
+            const rightHeaderY =
+              offset(rightHeader[rightIndex]).top +
+              rightHeader[rightIndex].offsetHeight / 2;
+            const rightOffsetY = y2 - rightHeaderY;
+            const speed = rightOffsetY / (this.duration / 6);
+            y2 = rightHeaderY;
+            y2 += this.drawNum * speed;
+            y2 > gY2 && (y2 = gY2);
+          } else {
+            // 已展开状态
+            const topY = offset(rightContent[rightIndex]).top;
+            const botY =
+              offset(rightContent[rightIndex]).top +
+              rightContent[rightIndex].offsetHeight;
+            if (y2 < topY) {
+              y2 = topY;
+            } else if (y2 > botY) {
+              y2 = botY;
+            }
           }
         } else {
-          // 已收起状态
-          rightIndex !== this.rightCloseName - 1 &&
-            (y2 =
+          // right 当前收起
+          if (rightIndex === this.rightCloseName - 1) {
+            this.drawNum++;
+            const rightHeaderY =
               offset(rightHeader[rightIndex]).top +
-              rightHeader[rightIndex].offsetHeight / 2);
-        }
-        // right 当前收起
-        if (rightIndex === this.rightCloseName - 1) {
-          this.drawNum++;
-          const rightHeaderY =
-            offset(rightHeader[rightIndex]).top +
-            rightHeader[rightIndex].offsetHeight / 2;
-          const rightOffsetY = y2 - rightHeaderY;
-          const speed = rightOffsetY / (this.duration / 12);
-          y2 > rightHeaderY && (y2 -= this.drawNum * speed);
-          y2 < rightHeaderY && (y2 = rightHeaderY);
+              rightHeader[rightIndex].offsetHeight / 2;
+            const rightOffsetY = y2 - rightHeaderY;
+            const speed = rightOffsetY / (this.duration / 6);
+            y2 > rightHeaderY && (y2 -= this.drawNum * speed);
+            y2 < rightHeaderY && (y2 = rightHeaderY);
+          } else {
+            // 已收起状态
+            rightIndex !== this.rightCloseName - 1 &&
+              (y2 =
+                offset(rightHeader[rightIndex]).top +
+                rightHeader[rightIndex].offsetHeight / 2);
+          }
         }
 
         line.y1 = y1 - offset(this.$el).top;
@@ -250,13 +266,6 @@ export default {
       });
       this.drawAllLines();
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      setTimeout(() => {
-        // this.lines.length && this.drawLine();
-      }, 350);
-    });
   }
 };
 </script>

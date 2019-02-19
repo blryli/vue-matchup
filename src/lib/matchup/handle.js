@@ -47,12 +47,12 @@ export default {
     // 选中行的回调
     leftCheckChange(checkeds, i) {
       this.leftChecked.splice(i, 1, checkeds);
-      this.leftCheckedIds = this.leftChecked.flat();
+      this.leftCheckedIds = [].concat.apply([],this.leftChecked);
       this.$emit('leftCheckChange', this.leftCheckedIds)
     },
     rightCheckChange(checkeds, i) {
       this.rightChecked.splice(i, 1, checkeds);
-      this.rightCheckedIds = this.rightChecked.flat();
+      this.rightCheckedIds = [].concat.apply([],this.rightChecked);
       this.$emit('rightCheckChange', this.rightCheckedIds)
     },
     // 选中行的方法

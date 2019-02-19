@@ -161,11 +161,6 @@ export default {
       });
       return value;
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.init();
-    });
   }
 };
 </script>
@@ -255,6 +250,7 @@ table {
 .no-data {
   padding: 10px 0;
   text-align: center;
+  color: #888;
 }
 </style>
 

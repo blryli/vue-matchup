@@ -8,7 +8,7 @@
 export default {
   name: "collapse",
   props: {
-    value: [String, Array],
+    value: Array,
     accordion: {
       type: Boolean,
       default: false

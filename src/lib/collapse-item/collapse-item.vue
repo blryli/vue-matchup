@@ -1,6 +1,11 @@
 <template>
   <div class="collapse-item" :style="{'--duration': `${duration/1000}s`}">
-    <div class="collapse-item__header" :class="{active: active}" @click="change">{{title}}</div>
+    <div
+      ref="header"
+      class="collapse-item__header"
+      :class="{active: active}"
+      @click="change"
+    >{{title}}</div>
     <div
       class="collapse-item__wrap"
       :class="{active: active}"
@@ -9,7 +14,7 @@
       <div
         class="collapse-item__content"
         ref="content"
-        :style="{'--height': height  + 'px'}"
+        :style="{'--height': active ? height  + 'px' : 0}"
         :dir="scrollDir === 'left' ? 'ltr' : undefined"
       >
         <slot></slot>
@@ -23,7 +28,7 @@ export default {
   name: "collapse-item",
   props: {
     title: String,
-    name: [String, Number],
+    name: String,
     scrollDir: {
       type: String,
       default: "right"
@@ -43,7 +48,9 @@ export default {
   },
   watch: {
     activeName(val) {
-      this.accordion && `${val}` !== `${this.name}` && (this.active = false);
+      if (this.accordion) {
+        this.active = val[0] === this.name;
+      }
     }
   },
   data() {
@@ -56,59 +63,26 @@ export default {
     change() {
       this.active = !this.active;
       if (this.accordion) {
-        if (this.activeName && Array.isArray(this.activeName)) {
-          const index = this.activeName.findIndex(
-            d => `${d}` === `${this.name}`
-          );
-          if (this.active) {
-            this.$set(this.$parent.$data, "activeName", `${this.name}`);
-          } else {
-            this.activeName.splice(index, 1);
-            this.$set(
-              this.$parent.$data,
-              "activeName",
-              `${this.activeName[0]}`
-            );
-          }
+        const index = this.activeName.findIndex(d => d === this.name);
+        if (this.active) {
+          this.$set(this.$parent.$data, "activeName", [this.name]);
         } else {
-          this.active
-            ? this.$set(this.$parent.$data, "activeName", `${this.name}`)
-            : this.$set(this.$parent.$data, "activeName", "");
+          this.$set(this.$parent.$data, "activeName", []);
         }
       } else {
-        if (this.activeName && Array.isArray(this.activeName)) {
-          const index = this.activeName.findIndex(
-            d => `${d}` === `${this.name}`
-          );
-          if (this.active) {
-            index === -1 && this.activeName.push(`${this.name}`);
-          } else {
-            this.activeName.splice(index, 1);
-          }
+        const index = this.activeName.findIndex(d => d === this.name);
+        if (this.active) {
+          index === -1 && this.activeName.push(this.name);
+        } else {
+          this.activeName.splice(index, 1);
         }
+        this.$set(this.$parent.$data, "activeName", this.activeName);
       }
     },
     init() {
-      this.$refs.content.style.height = "auto";
-      this.height = this.$refs.content.offsetHeight;
-      this.$refs.content.removeAttribute("style");
+      this.height = this.$slots.default[0].elm.offsetHeight;
+      this.active = !!this.activeName.find(d => d === this.name);
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.init();
-
-      !this.accordion &&
-        this.activeName &&
-        !Array.isArray(this.activeName) &&
-        this.$set(this.$parent.$data, "activeName", [this.activeName]);
-      if (this.activeName && Array.isArray(this.activeName)) {
-        this.activeName.find(d => `${d}` === `${this.name}`) &&
-          (this.active = true);
-      } else {
-        `${this.activeName}` === `${this.name}` && (this.active = true);
-      }
-    });
   }
 };
 </script>
@@ -163,6 +137,7 @@ export default {
   }
 }
 .collapse-item__content {
+  overflow: hidden;
   height: 0;
   font-size: 13px;
   color: #303133;

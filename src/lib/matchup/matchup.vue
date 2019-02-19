@@ -121,7 +121,7 @@ export default {
     },
     duration: {
       type: Number,
-      default: 300
+      default: 400
     },
     popover: {
       type: Boolean,
@@ -191,23 +191,27 @@ export default {
   },
   methods: {
     init() {
-      console.log('init')
+      console.log("component init...");
       this.$nextTick(() => {
+        this.$refs.canves.init();
         this.$refs["left-collapse-item"].forEach(d => {
           d.init();
-        });;
+        });
         this.$refs["right-collapse-item"].forEach(d => {
           d.init();
-        });;
+        });
         this.$refs["left-table"].forEach(d => {
           d.init();
         });
         this.$refs["right-table"].forEach(d => {
           d.init();
         });
-        this.setHeight();
+        !this.leftData.length && (this.leftActiveName = []);
+        !this.rightData.length && (this.rightActiveName = []);
         setTimeout(() => {
-          this.drawLine();
+          !this.leftData.length && (this.leftActiveName = ["1"]);
+          !this.rightData.length && (this.rightActiveName = ["1"]);
+          this.redrawLine();
         }, 0);
       });
     },
@@ -228,14 +232,14 @@ export default {
     collapseChange() {
       if (!this.value.length) {
         setTimeout(() => {
-          this.setHeight();
+          this.redrawLine();
         }, this.duration);
         return;
       }
-      this.setHeight();
+      this.redrawLine();
     },
-    // 调整canves高度
-    setHeight() {
+    // 重绘/调整canves高度
+    redrawLine() {
       if (!this.lines.length || !this.loadFinish) return;
       const timer = setInterval(() => {
         const left = this.$refs.left;
@@ -247,9 +251,10 @@ export default {
         setTimeout(() => {
           this.drawLine();
         }, 0);
-      }, 12);
+      }, 10);
       setTimeout(() => {
         clearTimeout(timer);
+        this.$refs.canves.clearActiveName();
       }, this.duration);
     },
     sizeChange() {
@@ -276,9 +281,7 @@ export default {
       this.rightHeader.forEach(d => {
         this.rightChecked.push([]);
       });
-      setTimeout(() => {
-        this.setHeight();
-      }, this.duration + 1);
+      this.init();
 
       this.leftContent.forEach(d => {
         on(d, "scroll", this.scrollChange);

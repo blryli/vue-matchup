@@ -28,6 +28,14 @@ export default {
   },
   computed: {},
   methods: {
+    init() {
+      this.canvas = this.$refs.canvas;
+      this.ctx = this.canvas.getContext("2d");
+      this.scrollTargets = allScrollNode(this.$el.parentNode);
+      this.scrollTargets.forEach(d => {
+        on(d, "scroll", this.windowScroll);
+      })
+    },
     // 画布鼠标移动
     move(e) {
       if (!this.lines.length || !this.readyLines.length) return;
@@ -161,10 +169,6 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.scrollTargets = allScrollNode(this.$el.parentNode);
-      this.scrollTargets.forEach(d => {
-        on(d, "scroll", this.windowScroll);
-      })
       on(window, "scroll", this.windowScroll);
     })
   },
