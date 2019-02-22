@@ -11,6 +11,7 @@
             :name="`${i + 1}`"
             scrollDir="left"
             :duration="duration"
+            :collapseMaxHeight="collapseMaxHeight"
           >
             <r-table
               :row="i"
@@ -31,7 +32,7 @@
         </collapse>
       </div>
     </div>
-    <div class="center" :style="{width: `${cvsWidth}px`,height: `${height}px`}">
+    <div class="center" :style="{width: `${cvsWidth}px`}">
       <m-canves
         ref="canves"
         :width="cvsWidth"
@@ -46,6 +47,7 @@
         @delete="deleteLine"
         @checkLine="cvsCheckLine"
         @unCheckLine="cvsUnCheckLine"
+        :style="{height: `${cvsBoxHeight}px`}"
       />
     </div>
     <div class="right" ref="right" id="right" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
@@ -58,6 +60,7 @@
             :title="`${showTitle(rightTitle, i)}`"
             :name="`${i + 1}`"
             :duration="duration"
+            :collapseMaxHeight="collapseMaxHeight"
           >
             <r-table
               v-model="rightChecked"
@@ -119,6 +122,7 @@ export default {
       type: Boolean,
       default: false
     },
+    collapseMaxHeight: Number,
     duration: {
       type: Number,
       default: 400
@@ -141,23 +145,11 @@ export default {
   data() {
     return {
       color: "",
-      leftChecked: [],
-      rightChecked: [],
       cvsWidth: 200,
       height: 200,
       leftActiveName: ["1"],
       rightActiveName: ["1"],
-      rightBox: [],
-      rightBox: [],
-      leftHeader: [],
-      leftContent: [],
-      rightHeader: [],
-      rightContent: [],
-      leftCheckedIds: [],
-      rightCheckedIds: [],
-      accordion: true,
-      activeData: {},
-      headerParent: []
+      cvsBoxHeight: 0
     };
   },
   computed: {
@@ -181,11 +173,9 @@ export default {
       val && this.loadFinish && this.drawLine();
     },
     leftData(val) {
-      this.leftDataChange = true;
       val && this.loadFinish && this.init();
     },
     rightData(val) {
-      this.rightDataChange = true;
       val && this.loadFinish && this.init();
     }
   },
@@ -194,12 +184,45 @@ export default {
       console.log("component init...");
       this.$nextTick(() => {
         this.$refs.canves.init();
-        this.$refs["left-collapse-item"].forEach(d => {
-          d.init();
+        this.leftHeader = Array.from(
+          this.$refs.left.querySelectorAll(".collapse-item__header")
+        );
+        this.leftContent = Array.from(
+          this.$refs.left.querySelectorAll(".collapse-item__wrap")
+        );
+        this.rightHeader = Array.from(
+          this.$refs.right.querySelectorAll(".collapse-item__header")
+        );
+        this.rightContent = Array.from(
+          this.$refs.right.querySelectorAll(".collapse-item__wrap")
+        );
+        this.leftChecked = [];
+        this.leftHeader.forEach(d => {
+          this.leftChecked.push([]);
         });
-        this.$refs["right-collapse-item"].forEach(d => {
-          d.init();
+        this.rightChecked = [];
+        this.rightHeader.forEach(d => {
+          this.rightChecked.push([]);
         });
+        this.leftContent.forEach(d => {
+          on(d, "scroll", this.scrollChange);
+        });
+        this.rightContent.forEach(d => {
+          on(d, "scroll", this.scrollChange);
+        });
+        let leftHeight = 0;
+        this.$refs["left-collapse-item"].forEach((d, i) => {
+          d.init();
+          const contentHeight = this.collapseMaxHeight || d.contentHeight;
+          leftHeight += contentHeight + d.headerHeight;
+        });
+        let rightHeight = 0;
+        this.$refs["right-collapse-item"].forEach((d, i) => {
+          d.init();
+          const contentHeight = this.collapseMaxHeight || d.contentHeight;
+          rightHeight += contentHeight + d.headerHeight;
+        });
+        this.height = leftHeight > rightHeight ? leftHeight : rightHeight;
         this.$refs["left-table"].forEach(d => {
           d.init();
         });
@@ -216,6 +239,9 @@ export default {
       });
     },
     drawLine() {
+      const leftHeight = this.$refs.left.offsetHeight;
+      const rightHeight = this.$refs.right.offsetHeight;
+      this.cvsBoxHeight = leftHeight > rightHeight ? leftHeight : rightHeight;
       this.$refs.canves.drawLine();
     },
     showTitle(title, i) {
@@ -238,19 +264,11 @@ export default {
       }
       this.redrawLine();
     },
-    // 重绘/调整canves高度
+    // 重绘
     redrawLine() {
       if (!this.lines.length || !this.loadFinish) return;
       const timer = setInterval(() => {
-        const left = this.$refs.left;
-        const right = this.$refs.right;
-        this.height =
-          left.offsetHeight > right.offsetHeight
-            ? left.offsetHeight
-            : right.offsetHeight;
-        setTimeout(() => {
-          this.drawLine();
-        }, 0);
+        this.drawLine();
       }, 10);
       setTimeout(() => {
         clearTimeout(timer);
@@ -263,32 +281,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.leftHeader = Array.from(
-        this.$refs.left.querySelectorAll(".collapse-item__header")
-      );
-      this.leftContent = Array.from(
-        this.$refs.left.querySelectorAll(".collapse-item__wrap")
-      );
-      this.rightHeader = Array.from(
-        this.$refs.right.querySelectorAll(".collapse-item__header")
-      );
-      this.rightContent = Array.from(
-        this.$refs.right.querySelectorAll(".collapse-item__wrap")
-      );
-      this.leftHeader.forEach(d => {
-        this.leftChecked.push([]);
-      });
-      this.rightHeader.forEach(d => {
-        this.rightChecked.push([]);
-      });
       this.init();
-
-      this.leftContent.forEach(d => {
-        on(d, "scroll", this.scrollChange);
-      });
-      this.rightContent.forEach(d => {
-        on(d, "scroll", this.scrollChange);
-      });
       on(window, "resize", this.sizeChange);
     });
   },

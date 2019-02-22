@@ -1,4 +1,17 @@
 export default {
+  data() {
+    return {
+      leftChecked: [],
+      rightChecked: [],
+      leftHeader: [],
+      leftContent: [],
+      rightHeader: [],
+      rightContent: [],
+      leftCheckedIds: [],
+      rightCheckedIds: [],
+      headerParent: []
+    };
+  },
   methods: {
     // 连接线的方法
     link(leftCheckedIds, rightCheckedIds) {

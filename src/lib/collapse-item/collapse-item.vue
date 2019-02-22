@@ -1,20 +1,19 @@
 <template>
   <div class="collapse-item" :style="{'--duration': `${duration/1000}s`}">
-    <div
-      ref="header"
-      class="collapse-item__header"
-      :class="{active: active}"
-      @click="change"
-    >{{title}}</div>
+    <div ref="header" class="collapse-item__header" :class="{active: active}" @click="change">
+      {{title}}
+      <div class="collapse-item__header-handle" @click="clear">清空</div>
+    </div>
     <div
       class="collapse-item__wrap"
       :class="{active: active}"
       :dir="scrollDir === 'left' ? 'rtl' : undefined"
+      :style="{maxHeight: collapseMaxHeight ? `${collapseMaxHeight}px` : ''}"
     >
       <div
         class="collapse-item__content"
         ref="content"
-        :style="{'--height': active ? height  + 'px' : 0}"
+        :style="{'--height': active ? contentHeight  + 'px' : 0}"
         :dir="scrollDir === 'left' ? 'ltr' : undefined"
       >
         <slot></slot>
@@ -36,7 +35,8 @@ export default {
     duration: {
       type: Number,
       default: 300
-    }
+    },
+    collapseMaxHeight: Number
   },
   computed: {
     activeName() {
@@ -55,7 +55,8 @@ export default {
   },
   data() {
     return {
-      height: 0,
+      headerHeight: 0,
+      contentHeight: 0,
       active: false
     };
   },
@@ -80,8 +81,13 @@ export default {
       }
     },
     init() {
-      this.height = this.$slots.default[0].elm.offsetHeight;
+      this.headerHeight = this.$refs.header.offsetHeight;
+      this.contentHeight = this.$slots.default[0].elm.offsetHeight;
       this.active = !!this.activeName.find(d => d === this.name);
+    },
+    clear(e) {
+      e.stopPropagation();
+      this.$children[0].clearChecked();
     }
   }
 };
@@ -103,6 +109,7 @@ export default {
   transition-property: border-bottom-color;
   transition-duration: var(--duration);
   outline: none;
+  overflow: hidden;
   &::after {
     content: "";
     display: block;
@@ -125,14 +132,18 @@ export default {
       transform: rotate(45deg);
     }
   }
-}
-.collapse-item__wrap {
-  background-color: #fff;
-  overflow: hidden;
-  &.active {
-    border-bottom: 1px solid #dfe2e9;
-    .collapse-item__content {
-      height: var(--height);
+  .collapse-item__header-handle {
+    position: absolute;
+    top: -100%;
+    transition: top 0.3s, opacity 0.3s;
+    right: 40px;
+    opacity: 0;
+    color: #139bd2;
+  }
+  &:hover {
+    .collapse-item__header-handle {
+      top: 0;
+      opacity: 1;
     }
   }
 }
@@ -150,6 +161,12 @@ export default {
 
 .collapse-item__wrap {
   overflow: auto;
+  background-color: #fff;
+  &.active {
+    .collapse-item__content {
+      height: var(--height);
+    }
+  }
   &::-webkit-scrollbar {
     width: 10px;
     height: 1px;

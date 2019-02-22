@@ -106,7 +106,7 @@ export default {
       this.handleData.forEach(d => {
         d.check = false;
       });
-      this.$emit("checkChange", []);
+      this.$emit("checkChange", [], this.row);
     },
     mouseenter(e, obj, id) {
       if (this.enterable) {

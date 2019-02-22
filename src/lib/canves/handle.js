@@ -1,5 +1,12 @@
-import { offset, scroll, allScrollNode } from "../../utils/util";
-import { on, off } from "../../utils/dom";
+import {
+  offset,
+  scroll,
+  allScrollNode
+} from "../../utils/util";
+import {
+  on,
+  off
+} from "../../utils/dom";
 
 export default {
   data() {
@@ -10,11 +17,13 @@ export default {
       readyLines: [],
       scrollTargets: [],
       scrollTop: scroll().top,
-      scrollLeft: scroll().left
+      scrollLeft: scroll().left,
+      cacheCanvas: null
     }
   },
   watch: {
     lineCheckedId(val, oldVal) {
+      this.drawAllLines();
       if (val !== oldVal) {
         oldVal && this.$emit('unCheckLine', oldVal);
         val && this.$emit('checkLine', val);
@@ -24,6 +33,9 @@ export default {
       } else {
         this.$emit('unCheckLine', oldVal)
       }
+    },
+    lineMoveId() {
+      this.drawAllLines();
     }
   },
   computed: {
@@ -46,31 +58,41 @@ export default {
     },
     // 画布鼠标移动
     move(e) {
+      e = e || event;
       if (!this.lines.length || !this.readyLines.length) return;
       this.inLine(e, 'move');
     },
-    check(e) {
+    leave() {
+      this.lineMoveId = null;
+      this.drawAllLines();
+    },
+    click(e) {
+      e = e || event;
       if (!this.lines.length || !this.readyLines.length) return;
       this.lineCheckedIds = [];
       this.inLine(e, 'click');
     },
-    edit() {
+    dblclick() {
       if (!this.lineMoveId) return;
       this.$emit('dblclick', this.lineMoveId);
     },
     drawAllLines() {
       this.ctx.clearRect(0, 0, this.width, this.height);
-
-      // 画出逐条线
       this.readyLines.forEach(d => {
-        var lineColor = d.color;
-        this.lineMoveId && this.lineMoveId === d.id && (lineColor = 'orange');
-        this.lineCheckedId && this.lineCheckedId === d.id && (lineColor = '#139bd2');
-        this.lineCheckedIds.find(id => id === d.id) && (lineColor = '#139bd2');
-        this.Arrow(d.p1.x, d.p1.y,d.p2.x, d.p2.y, lineColor);
+        let lineColor = d.color;
+        let lineWidth = 1.6;
+        if (this.lineCheckedId && this.lineCheckedId === d.id || this.lineCheckedIds.find(id => id === d.id)) {
+          lineColor = '#139bd2';
+          lineWidth = 3;
+        }
+        if (this.lineMoveId && this.lineMoveId === d.id) {
+          lineColor = 'orange';
+          lineWidth = 3;
+        }
+        this.drawArrow(this.ctx, d.p1.x, d.p1.y, d.p2.x, d.p2.y, lineColor, lineWidth);
       })
     },
-    inLine (e, type) {
+    inLine(e, type) {
       // 鼠标点击的坐标
       const px = e.clientX - offset(this.$refs.canvas).left + this.scrollLeft;
       const py = e.clientY - offset(this.$refs.canvas).top + this.scrollTop;
@@ -89,24 +111,14 @@ export default {
         if (p1.y === p2.y) {
           // 水平线
           if ((px >= minX && px <= maxX) && (py >= minY - lineOffset && py <= maxY + lineOffset)) {
-            if (type === 'move') {
-              this.lineMoveId = line.id
-            } 
-            if (type === 'click'){
-              this.lineCheckedId = this.lineCheckedId === line.id ? null : line.id; 
-            }
+            this.setHandleId(line, type);
             break;
           }
 
         } else if (p1.x === p2.x) {
           // 垂直线
           if ((py >= minY && py <= maxY) && (px >= minX - lineOffset && px <= maxX + lineOffset)) {
-            if (type === 'move') {
-              this.lineMoveId = line.id
-            } 
-            if (type === 'click'){
-              this.lineCheckedId = this.lineCheckedId === line.id ? null : line.id; 
-            }  
+            this.setHandleId(line, type);
             break;
           }
         } else {
@@ -115,18 +127,13 @@ export default {
             // 用三角函数计出直线上的交叉点
             var r = (px - p1.x) / Math.cos(hudu); // 直角三角形的斜边（或理解成圆的半径）
             var y = Math.sin(hudu) * r; // Y轴坐标
-            
+
             var p = {
               x: px,
               y: p1.y + y
             };
             if ((Math.abs(px - p.x) <= lineOffset) && (Math.abs(py - p.y) <= lineOffset)) {
-              if (type === 'move') {
-                this.lineMoveId = line.id
-              } 
-              if (type === 'click'){
-                this.lineCheckedId = this.lineCheckedId === line.id ? null : line.id; 
-              }  
+              this.setHandleId(line, type);
               break;
             }
           }
@@ -134,7 +141,14 @@ export default {
         type === 'move' && (this.lineMoveId = null);
         type === 'click' && this.lineCheckedId === line.id && (this.lineCheckedId = null);
       }
-      this.drawAllLines();
+    },
+    setHandleId(line, type) {
+      if (type === 'move') {
+        this.lineMoveId = line.id
+      }
+      if (type === 'click') {
+        this.lineCheckedId = this.lineCheckedId === line.id ? null : line.id;
+      }
     },
     deleted() {
       if (this.lineCheckedId) {
@@ -179,13 +193,11 @@ export default {
     this.$nextTick(() => {
       this.canvas = this.$refs.canvas;
       this.ctx = this.canvas.getContext("2d");
-      on(window, "scroll", this.windowScroll);
     })
   },
   beforeDestroy() {
     this.scrollTargets.forEach(d => {
       off(d, "scroll", this.windowScroll);
     })
-    off(window, "scroll", this.windowScroll);
   }
 }

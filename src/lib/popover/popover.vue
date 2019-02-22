@@ -139,7 +139,7 @@ export default {
   methods: {
     init() {
       this.scrollTargets = allScrollNode(this.matchup.$el.parentNode);
-      this.scrollTargets.push(this.$el.parentNode.parentNode);
+      this.scrollTargets.push(this.$el.parentNode.parentNode.parentNode);
       this.scrollTargets.forEach(d => {
         on(d, "scroll", this.windowScroll);
       })

@@ -1,13 +1,14 @@
 <template>
-  <div class="canves" :style="{left: `-${offset}px`}">
+  <div class="canves-group">
     <canvas
       ref="canvas"
       class="canvas"
-      :width="width + offset*2"
+      :width="width"
       :height="height"
       @mousemove="move($event)"
-      @click="check($event)"
-      @dblclick="edit($event)"
+      @mouseleave="leave"
+      @click="click($event)"
+      @dblclick="dblclick($event)"
     ></canvas>
     <input
       class="flows__handle-input"
@@ -31,7 +32,7 @@ export default {
     width: Number,
     offset: {
       type: Number,
-      default: 2
+      default: 5
     },
     value: {
       type: Array,
@@ -74,12 +75,6 @@ export default {
       drawNum: 0,
       groupsId: 0
     };
-  },
-  created() {
-    this.$nextTick(() => {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext("2d");
-    });
   },
   computed: {
     lines() {
@@ -132,8 +127,6 @@ export default {
     },
     // 画线
     drawLine() {
-      this.ctx &&
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       if (!this.lines.length || !this.loadFinish) {
         this.readyLines = [];
         return;
@@ -151,7 +144,7 @@ export default {
         const rightIndex = rightContent.findIndex(d => d.contains(rightItem));
         !line.id && (line.id = `${line.leftId}--${line.rightId}`);
         line.x1 = 5;
-        line.x2 = this.width + this.offset * 2 - 6;
+        line.x2 = this.width - 6;
         line.color = line.color || "#555";
         let y1 =
           offset(leftItem).top +
@@ -164,41 +157,41 @@ export default {
           rightContent[rightIndex].scrollTop;
         const gY2 = y2;
 
-        // left y1 坐标
+        this.drawNum++;
+        const collapseMaxHeight = this.$parent.$props.collapseMaxHeight;
+        /* left y1 坐标 */
+        // 动画步长
+        const leftHeaderY =
+          offset(leftHeader[leftIndex]).top +
+          leftHeader[leftIndex].offsetHeight / 2;
+        const leftOffsetY = y1 - leftHeaderY;
+        const leftSpeed = leftOffsetY / (this.duration / 3);
+        // 边界
+        const leftTopY = offset(leftContent[leftIndex]).top;
+        const leftBotY =
+          offset(leftContent[leftIndex]).top +
+          leftContent[leftIndex].offsetHeight;
         if (this.leftActiveName.find(d => parseInt(d) - 1 === leftIndex)) {
-          // 当前展开
+          // 展开
           if (leftIndex === this.leftOpenName - 1) {
-            this.drawNum++;
-            const leftHeaderY =
-              offset(leftHeader[leftIndex]).top +
-              leftHeader[leftIndex].offsetHeight / 2;
-            const leftOffsetY = y1 - leftHeaderY;
-            const speed = leftOffsetY / (this.duration / 6);
+            // 当前展开
             y1 = leftHeaderY;
-            y1 += this.drawNum * speed;
+            y1 += this.drawNum * leftSpeed;
             y1 > gY1 && (y1 = gY1);
+            y1 > leftBotY && (y1 = leftBotY);
           } else {
             // 已展开状态
-            const topY = offset(leftContent[leftIndex]).top;
-            const botY =
-              offset(leftContent[leftIndex]).top +
-              leftContent[leftIndex].offsetHeight;
-            if (y1 < topY) {
-              y1 = topY;
-            } else if (y1 > botY) {
-              y1 = botY;
+            if (y1 < leftTopY) {
+              y1 = leftTopY;
+            } else if (y1 > leftBotY) {
+              y1 = leftBotY;
             }
           }
         } else {
           // left 当前收起
           if (leftIndex === this.leftCloseName - 1) {
-            this.drawNum++;
-            const leftHeaderY =
-              offset(leftHeader[leftIndex]).top +
-              leftHeader[leftIndex].offsetHeight / 2;
-            const leftOffsetY = y1 - leftHeaderY;
-            const speed = leftOffsetY / (this.duration / 6);
-            y1 > leftHeaderY && (y1 -= this.drawNum * speed);
+            y1 > leftBotY && (y1 = leftBotY);
+            y1 > leftHeaderY && (y1 -= this.drawNum * leftSpeed);
             y1 < leftHeaderY && (y1 = leftHeaderY);
           } else {
             // 已收起状态
@@ -209,41 +202,38 @@ export default {
           }
         }
 
-        // right y2 坐标
+        /* right y2 坐标 */
+        // 动画步长
+        const rightHeaderY =
+          offset(rightHeader[rightIndex]).top +
+          rightHeader[rightIndex].offsetHeight / 2;
+        const rightOffsetY = y2 - rightHeaderY;
+        const rightSpeed = rightOffsetY / (this.duration / 3);
+        // 边界
+        const rightTopY = offset(rightContent[rightIndex]).top;
+        const rightBotY =
+          offset(rightContent[rightIndex]).top +
+          rightContent[rightIndex].offsetHeight;
         if (this.rightActiveName.find(d => parseInt(d) - 1 === rightIndex)) {
           // 当前展开
           if (rightIndex === this.rightOpenName - 1) {
-            this.drawNum++;
-            const rightHeaderY =
-              offset(rightHeader[rightIndex]).top +
-              rightHeader[rightIndex].offsetHeight / 2;
-            const rightOffsetY = y2 - rightHeaderY;
-            const speed = rightOffsetY / (this.duration / 6);
             y2 = rightHeaderY;
-            y2 += this.drawNum * speed;
+            y2 += this.drawNum * rightSpeed;
             y2 > gY2 && (y2 = gY2);
+            y2 > rightBotY && (y2 = rightBotY);
           } else {
             // 已展开状态
-            const topY = offset(rightContent[rightIndex]).top;
-            const botY =
-              offset(rightContent[rightIndex]).top +
-              rightContent[rightIndex].offsetHeight;
-            if (y2 < topY) {
-              y2 = topY;
-            } else if (y2 > botY) {
-              y2 = botY;
+            if (y2 < rightTopY) {
+              y2 = rightTopY;
+            } else if (y2 > rightBotY) {
+              y2 = rightBotY;
             }
           }
         } else {
           // right 当前收起
           if (rightIndex === this.rightCloseName - 1) {
-            this.drawNum++;
-            const rightHeaderY =
-              offset(rightHeader[rightIndex]).top +
-              rightHeader[rightIndex].offsetHeight / 2;
-            const rightOffsetY = y2 - rightHeaderY;
-            const speed = rightOffsetY / (this.duration / 6);
-            y2 > rightHeaderY && (y2 -= this.drawNum * speed);
+            y2 > rightBotY && (y2 = rightBotY);
+            y2 > rightHeaderY && (y2 -= this.drawNum * rightSpeed);
             y2 < rightHeaderY && (y2 = rightHeaderY);
           } else {
             // 已收起状态
@@ -262,7 +252,6 @@ export default {
           p2: { x: line.x2, y: line.y2 },
           color: line.color
         });
-        this.Arrow(line.x1, line.y1, line.x2, line.y2);
       });
       this.drawAllLines();
     }
@@ -270,11 +259,15 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.canves {
+<style lang="scss" scoped>
+.canves-group {
+  position: relative;
+  overflow: hidden;
+}
+.canvas {
   position: absolute;
+  left: 0;
   top: 0;
-  z-index: 100;
 }
 .flows__handle-input {
   position: absolute;
