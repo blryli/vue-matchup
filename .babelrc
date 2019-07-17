@@ -2,5 +2,13 @@
   "presets": [
     ["env", { "modules": false }],
     "stage-3"
+  ],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["src/"]
+      }
+    ]
   ]
 }

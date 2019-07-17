@@ -1,45 +1,49 @@
 {
   "name": "vue-matchup",
-  "description": "A Vue.js project",
-  "version": "1.0.27",
-  "author": "lizhili <405549416@qq.com>",
+  "version": "1.0.0",
+  "description": "A rollup + vue component development template",
+  "main": "dist/vue-matchup.umd.js",
+  "module": "dist/vue-matchup.esm.js",
+  "unpkg": "dist/vue-matchup.min.js",
+  "scripts": {
+    "build": "npm run build:browser && npm run build:es && npm run build:umd",
+    "build:browser": "rollup --config build/rollup.config.browser.js",
+    "build:es": "rollup --config build/rollup.config.es.js",
+    "build:umd": "rollup --config build/rollup.config.umd.js",
+    "dev": "cross-env NODE_ENV=development rollup --config build/rollup.config.es.js --watch"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "matchup",
+    "reletion",
+    "canves"
+  ],
+  "author": "blryli",
   "license": "MIT",
-  "private": false,
-  "main": "dist/vue-matchup.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/blryli/vue-matchup"
+    "url": "git+https://github.com/blryli/vue-matchup.git"
   },
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  "bugs": {
+    "url": "https://github.com/blryli/vue-matchup/issues"
   },
-  "dependencies": {
-    "element-ui": "^2.4.11",
-    "vue": "^2.5.11"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ],
+  "homepage": "https://github.com/blryli/vue-matchup#readme",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
-    "cross-env": "^5.0.5",
-    "css-loader": "^0.28.7",
-    "element-ui": "^2.5.2",
-    "file-loader": "^1.1.4",
-    "md-editor2": "^0.1.12",
-    "node-sass": "^4.5.3",
-    "sass-loader": "^6.0.6",
-    "url-loader": "^1.1.2",
-    "vue-loader": "^13.0.5",
-    "vue-template-compiler": "^2.4.4",
-    "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "clean-css": "^4.2.1",
+    "cross-env": "^5.2.0",
+    "rollup": "^1.16.7",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-css-only": "^1.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-uglify-es": "0.0.1",
+    "rollup-plugin-vue": "^5.0.1",
+    "vue": "^2.6.10",
+    "vue-template-compiler": "^2.6.10"
   }
 }
