@@ -3,11 +3,15 @@
     <center>
       <p>
         <el-button @click="link">连接</el-button>
-        <el-button @click="clearCheckedLines">清空选中线条</el-button>
+        <!-- <el-button @click="linkLine">连接多条</el-button>
+        <el-button @click="checkLines">选中多条</el-button>
+        <el-button @click="unCheckedLines">取消选中多条</el-button>
+        <el-button @click="clearCheckedLines">清空选中线条</el-button> -->
       </p>
     </center>
     <div class="box">
       <vue-matchup
+        popover
         ref="matchup"
         v-model="lines"
         :leftData="items"
@@ -41,26 +45,25 @@ export default {
       rightIdFun: (row, index) => `R${index}-${row.lineNo}`,
       leftPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, [data.lineNo])
+          this.$createElement("p", {}, ['序号: '+data.lineNo]),
+          this.$createElement("p", {}, ['SKU: '+data.sku]),
+          this.$createElement("p", {}, ['数量: '+data.qty]),
+          this.$createElement("p", {}, ['单位: ' + data.unit]),
+          this.$createElement("p", {}, ['毛重: ' + data.nw.weight + '/' + data.nw.unit])
         ]);
       },
       rightPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, ["message"]),
-          this.$createElement("p", {}, [data])
+          this.$createElement("p", {}, [`序号: ${data.lineNo}`]),
+          this.$createElement("p", {}, [`customsLedgerId: ${data.customsLedgerId}`]),
+          this.$createElement("p", {}, [`customsLedgerLineNo: ${data.customsLedgerLineNo}`]),
+          this.$createElement("p", {}, [`hsCode: ${data.hsCode}`]),
+          this.$createElement("p", {}, [`名字: ${data.name}`]),
+          this.$createElement("p", {}, [`数量: ${data.qty1}`]),
+          this.$createElement("p", {}, [`单位: ${data.unit1}`])
         ]);
       },
       items: [],
-      decItems: mock.mock([
-        [
-          {}
-        ]
-      ]),
       decItems: [],
       lines: [
         { leftId: "L1-1", rightId: "R1-5" },
@@ -140,7 +143,7 @@ export default {
     },
     // 取消选中线的方法
     unCheckedLines() {
-      this.$refs.matchup.unCheckedLines(["L1-1--R1-3", "L1-2--R1-4"]);
+      this.$refs.matchup.unCheckedLines(["L1-1--R1-3", "L1-2--R1-4", "L1-3--R1-4"]);
     },
     // 清空选中线的方法
     clearCheckedLines() {
@@ -183,10 +186,10 @@ export default {
       const decItems = (num) => mock.mock({
         ['array|' + num]: [{
           'lineNo|+1': 1,
-          customsLedgerId: null,
-          customsLedgerLineNo: 0,
+          customsLedgerId: /1000[1-100]/,
+          customsLedgerLineNo: /99[1-100]/,
           hsCode: "0101000100",
-          name: null,
+          name: '@name',
           'qty1|100-500': 100,
           unit1: /kg|g|ml/
         }]
@@ -194,7 +197,7 @@ export default {
       const items = (num) => mock.mock({
         ['array|' + num]: [{
           'lineNo|+1': 1,
-          sku: null,
+          sku: '@name',
           'qty|100-500': 100,
           unit: "PCS",
           nw: { 'weight|100-500': 100, unit: /kg|g|ml/ },
