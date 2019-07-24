@@ -1,5 +1,5 @@
 <template>
-  <div class="collapse-item" :style="{'--duration': `${duration/1000}s`}">
+  <div class="collapse-item" :style="{'--duration': `${duration/1050}s`}">
     <div ref="header" class="collapse-item__header" :class="{active: active}" @click="change">
       {{title}}
       <div class="collapse-item__header-handle" @click="clear">清空</div>
@@ -100,10 +100,10 @@ export default {
   align-items: center;
   height: 48px;
   line-height: 48px;
-  background-color: #fff;
+  background-color: #f1f2f3;
   color: #303133;
   cursor: pointer;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #ddd;
   font-size: 13px;
   font-weight: 500;
   transition-property: border-bottom-color;
@@ -127,7 +127,7 @@ export default {
     transition-duration: var(--duration);
   }
   &.active {
-    border-bottom-color: transparent;
+    // border-bottom-color: transparent;
     &::after {
       transform: rotate(45deg);
     }

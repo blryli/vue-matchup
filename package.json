@@ -1,6 +1,6 @@
 {
   "name": "vue-matchup",
-  "version": "1.0.0",
+  "version": "1.0.28",
   "description": "A rollup + vue component development template",
   "main": "dist/vue-matchup.umd.js",
   "module": "dist/vue-matchup.esm.js",

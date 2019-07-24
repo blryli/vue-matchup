@@ -279,7 +279,7 @@ export default {
       if (!this.lines.length || !this.loadFinish) return;
       const timer = setInterval(() => {
         this.drawLine();
-      }, 10);
+      }, 16.7);
       setTimeout(() => {
         clearTimeout(timer);
         this.$refs.canves.clearActiveName();

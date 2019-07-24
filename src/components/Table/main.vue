@@ -14,6 +14,7 @@
       <tbody>
         <tr
           class="table__row"
+          :style="{'--lineColor': tableRowPointToColor}"
           v-for="(da, idx) in tbodyData"
           :key="idx"
           :class="{active: handleData.length && handleData[idx].check}"
@@ -64,7 +65,11 @@ export default {
     popover: Boolean,
     enterable: Boolean,
     hideDelay: Number,
-    popoverContentFun: Function
+    popoverContentFun: Function,
+    tableRowPointToColor: {
+      type: String,
+      default: 'orange'
+    }
   },
   data() {
     return {
@@ -255,6 +260,9 @@ table {
   padding: 10px 0;
   text-align: center;
   color: #888;
+}
+.line-check{
+  background-color: var(--lineColor);
 }
 </style>
 

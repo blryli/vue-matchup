@@ -133,7 +133,7 @@
   /* style */
   var __vue_inject_styles__ = undefined;
   /* scoped */
-  var __vue_scope_id__ = "data-v-b7a3a4b4";
+  var __vue_scope_id__ = "data-v-33bbdf4c";
   /* module identifier */
   var __vue_module_identifier__ = undefined;
   /* functional template */
@@ -258,7 +258,7 @@
     var _c = _vm._self._c || _h;
     return _c("div", {
       staticClass: "collapse-item",
-      style: { "--duration": _vm.duration / 1000 + "s" }
+      style: { "--duration": _vm.duration / 1050 + "s" }
     }, [_c("div", {
       ref: "header",
       staticClass: "collapse-item__header",
@@ -287,7 +287,7 @@
   /* style */
   var __vue_inject_styles__$1 = undefined;
   /* scoped */
-  var __vue_scope_id__$1 = "data-v-5a6e88b6";
+  var __vue_scope_id__$1 = "data-v-5686f06b";
   /* module identifier */
   var __vue_module_identifier__$1 = undefined;
   /* functional template */
@@ -8356,7 +8356,7 @@
   /* style */
   var __vue_inject_styles__$3 = undefined;
   /* scoped */
-  var __vue_scope_id__$3 = "data-v-3d777082";
+  var __vue_scope_id__$3 = "data-v-007459c8";
   /* module identifier */
   var __vue_module_identifier__$3 = undefined;
   /* functional template */
@@ -8383,7 +8383,11 @@
       popover: Boolean,
       enterable: Boolean,
       hideDelay: Number,
-      popoverContentFun: Function
+      popoverContentFun: Function,
+      tableRowPointToColor: {
+        type: String,
+        default: 'orange'
+      }
     },
     data: function data() {
       return {
@@ -8508,6 +8512,7 @@
         class: {
           active: _vm.handleData.length && _vm.handleData[idx].check
         },
+        style: { "--lineColor": _vm.tableRowPointToColor },
         on: {
           click: function click($event) {
             return _vm.clickRow(idx);
@@ -8557,7 +8562,7 @@
   /* style */
   var __vue_inject_styles__$4 = undefined;
   /* scoped */
-  var __vue_scope_id__$4 = "data-v-117a580e";
+  var __vue_scope_id__$4 = "data-v-2951e155";
   /* module identifier */
   var __vue_module_identifier__$4 = undefined;
   /* functional template */
@@ -8676,6 +8681,7 @@
         lineMoveId: null,
         lineCheckedId: null,
         lineCheckedIds: [],
+        lineCheckedIdsOld: [],
         readyLines: [],
         scrollTargets: [],
         scrollTop: scroll().top,
@@ -8690,14 +8696,29 @@
 
         this.drawAllLines();
         if (val !== oldVal) {
-          oldVal && this.$emit('unCheckLine', oldVal);
-          val && this.$emit('checkLine', val);
+          if (oldVal) {
+            this._toggleTableRows(oldVal, 'remove');
+            this.$emit('unCheckLine', oldVal);
+          }
+          if (val) {
+            this._toggleTableRows(val, 'add');
+            this.$emit('checkLine', val);
+          }
           this.$nextTick(function () {
             _this.$refs.input.focus();
           });
         } else {
           this.$emit('unCheckLine', oldVal);
         }
+      },
+      lineCheckedIds: function lineCheckedIds(val) {
+        if (val.length > this.lineCheckedIdsOld.length) {
+          this._toggleTableRows(val, 'add');
+        } else {
+          this._toggleTableRows(this.lineCheckedIdsOld, 'remove');
+        }
+        this.drawAllLines();
+        this.lineCheckedIdsOld = JSON.parse(JSON.stringify(val));
       },
       lineMoveId: function lineMoveId() {
         this.drawAllLines();
@@ -8867,6 +8888,16 @@
         this.lineCheckedId = null;
         this.drawAllLines();
       },
+
+      // 选中线时对应的table列高亮选中
+      _toggleTableRows: function _toggleTableRows(lineIds, type) {
+        lineIds = Array.isArray(lineIds) ? lineIds : [lineIds];
+        lineIds.forEach(function (lineId) {
+          var ids = lineId.split('--');
+          document.getElementById(ids[0]).parentElement.classList[type]('line-check');
+          document.getElementById(ids[1]).parentElement.classList[type]('line-check');
+        });
+      },
       windowScroll: function windowScroll() {
         var _this6 = this;
 
@@ -8924,8 +8955,8 @@
           return [];
         }
       },
-      leftActiveName: [Array],
-      rightActiveName: [Array],
+      leftActiveName: Array,
+      rightActiveName: Array,
       height: {
         type: Number,
         default: 50
@@ -9059,7 +9090,7 @@
           // 动画步长
           var leftHeaderY = offset(leftHeader[leftIndex]).top + leftHeader[leftIndex].offsetHeight / 2;
           var leftOffsetY = y1 - leftHeaderY;
-          var leftSpeed = leftOffsetY / (_this4.duration / 3);
+          var leftSpeed = leftOffsetY / (_this4.duration / 6);
           // 边界
           var leftTopY = offset(leftContent[leftIndex]).top;
           var leftBotY = offset(leftContent[leftIndex]).top + leftContent[leftIndex].offsetHeight;
@@ -9097,7 +9128,7 @@
           // 动画步长
           var rightHeaderY = offset(rightHeader[rightIndex]).top + rightHeader[rightIndex].offsetHeight / 2;
           var rightOffsetY = y2 - rightHeaderY;
-          var rightSpeed = rightOffsetY / (_this4.duration / 3);
+          var rightSpeed = rightOffsetY / (_this4.duration / 6);
           // 边界
           var rightTopY = offset(rightContent[rightIndex]).top;
           var rightBotY = offset(rightContent[rightIndex]).top + rightContent[rightIndex].offsetHeight;
@@ -9188,7 +9219,7 @@
   /* style */
   var __vue_inject_styles__$5 = undefined;
   /* scoped */
-  var __vue_scope_id__$5 = "data-v-96d4836c";
+  var __vue_scope_id__$5 = "data-v-28cbf310";
   /* module identifier */
   var __vue_module_identifier__$5 = undefined;
   /* functional template */
@@ -9526,7 +9557,7 @@
         if (!this.lines.length || !this.loadFinish) return;
         var timer = setInterval(function () {
           _this3.drawLine();
-        }, 10);
+        }, 16.7);
         setTimeout(function () {
           clearTimeout(timer);
           _this3.$refs.canves.clearActiveName();

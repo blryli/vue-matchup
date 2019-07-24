@@ -137,9 +137,11 @@ export default {
 
 ### 版本
 
-#### 1.0.26
+#### 1.0.28
 
-- 修复页面滚动时，操作点定位不准确问题。
+- 迁移rollup。
+
+- 线条选中时，线对应的 table 行背景高亮。
 
 #### 1.0.27
 
@@ -154,6 +156,7 @@ export default {
 - 线经过及选中时增加加粗效果。
 
 - 增加 collapseMaxHeight 属性，用于设置面板最大高度。
+
 
 [历史版本](https://github.com/blryli/vue-matchup/blob/master/VERSION.md)
 

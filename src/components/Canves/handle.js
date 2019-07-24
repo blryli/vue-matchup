@@ -14,6 +14,7 @@ export default {
       lineMoveId: null,
       lineCheckedId: null,
       lineCheckedIds: [],
+      lineCheckedIdsOld: [],
       readyLines: [],
       scrollTargets: [],
       scrollTop: scroll().top,
@@ -25,14 +26,29 @@ export default {
     lineCheckedId(val, oldVal) {
       this.drawAllLines();
       if (val !== oldVal) {
-        oldVal && this.$emit('unCheckLine', oldVal);
-        val && this.$emit('checkLine', val);
+        if(oldVal) {
+          this._toggleTableRows(oldVal, 'remove')
+          this.$emit('unCheckLine', oldVal)
+        }
+        if(val) {
+          this._toggleTableRows(val, 'add')
+          this.$emit('checkLine', val)
+        }
         this.$nextTick(() => {
           this.$refs.input.focus();
         })
       } else {
         this.$emit('unCheckLine', oldVal)
       }
+    },
+    lineCheckedIds(val) {
+      if (val.length > this.lineCheckedIdsOld.length) {
+        this._toggleTableRows(val, 'add')
+      } else {
+        this._toggleTableRows(this.lineCheckedIdsOld, 'remove')
+      }
+      this.drawAllLines();
+      this.lineCheckedIdsOld = JSON.parse(JSON.stringify(val))
     },
     lineMoveId() {
       this.drawAllLines();
@@ -179,6 +195,15 @@ export default {
       this.lineCheckedIds = [];
       this.lineCheckedId = null;
       this.drawAllLines();
+    },
+    // 选中线时对应的table列高亮选中
+    _toggleTableRows(lineIds,type) {
+      lineIds = Array.isArray(lineIds) ? lineIds : [lineIds]
+      lineIds.forEach(lineId => {
+        const ids = lineId.split('--')
+        document.getElementById(ids[0]).parentElement.classList[type]('line-check')
+        document.getElementById(ids[1]).parentElement.classList[type]('line-check')
+      })
     },
     windowScroll() {
       this.scrollTop = scroll().top;

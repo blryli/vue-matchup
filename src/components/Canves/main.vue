@@ -46,8 +46,8 @@ export default {
       type: Array,
       default: () => []
     },
-    leftActiveName: [Array],
-    rightActiveName: [Array],
+    leftActiveName: Array,
+    rightActiveName: Array,
     height: {
       type: Number,
       default: 50
@@ -165,7 +165,7 @@ export default {
           offset(leftHeader[leftIndex]).top +
           leftHeader[leftIndex].offsetHeight / 2;
         const leftOffsetY = y1 - leftHeaderY;
-        const leftSpeed = leftOffsetY / (this.duration / 3);
+        const leftSpeed = leftOffsetY / (this.duration / 6);
         // 边界
         const leftTopY = offset(leftContent[leftIndex]).top;
         const leftBotY =
@@ -208,7 +208,7 @@ export default {
           offset(rightHeader[rightIndex]).top +
           rightHeader[rightIndex].offsetHeight / 2;
         const rightOffsetY = y2 - rightHeaderY;
-        const rightSpeed = rightOffsetY / (this.duration / 3);
+        const rightSpeed = rightOffsetY / (this.duration / 6);
         // 边界
         const rightTopY = offset(rightContent[rightIndex]).top;
         const rightBotY =
