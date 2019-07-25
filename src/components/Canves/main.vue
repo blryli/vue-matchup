@@ -22,8 +22,10 @@
 
 <script>
 import { offset } from "utils/util";
+import { getDomClientRect, getParentNodes, enableEventListener, removeEventListener } from "utils/dom";
 import Graph from "./graph";
 import Handle from "./handle";
+import { setTimeout } from 'timers';
 
 export default {
   name: "Canves",
@@ -64,6 +66,7 @@ export default {
   },
   data() {
     return {
+      elTop: 0,
       canvas: "",
       ctx: "",
       leftActiveNameOld: JSON.parse(JSON.stringify(this.leftActiveName)),
@@ -146,106 +149,87 @@ export default {
         line.x1 = 5;
         line.x2 = this.width - 6;
         line.color = line.color || "#555";
-        let y1 =
-          offset(leftItem).top +
-          leftItem.offsetHeight / 2 -
-          leftContent[leftIndex].scrollTop;
+        const leftRect = getDomClientRect(leftItem)
+        let y1 = leftRect.centerY
         const gY1 = y1;
-        let y2 =
-          offset(rightItem).top +
-          rightItem.offsetHeight / 2 -
-          rightContent[rightIndex].scrollTop;
+        const rightRect = getDomClientRect(rightItem)
+        let y2 = rightRect.centerY
         const gY2 = y2;
 
         this.drawNum++;
         const collapseMaxHeight = this.$parent.$props.collapseMaxHeight;
         /* left y1 坐标 */
         // 动画步长
-        const leftHeaderY =
-          offset(leftHeader[leftIndex]).top +
-          leftHeader[leftIndex].offsetHeight / 2;
-        const leftOffsetY = y1 - leftHeaderY;
-        const leftSpeed = leftOffsetY / (this.duration / 6);
+        const leftHeaderRect = getDomClientRect(leftHeader[leftIndex])
+        const leftToHeaderOffset = y1 - leftHeaderRect.centerY; // left节点到 header 中点的距离
+        const leftSpeed = leftToHeaderOffset / (this.duration / 6);
         // 边界
-        const leftTopY = offset(leftContent[leftIndex]).top;
-        const leftBotY =
-          offset(leftContent[leftIndex]).top +
-          leftContent[leftIndex].offsetHeight;
+        const leftContentRect = getDomClientRect(leftContent[leftIndex])
         if (this.leftActiveName.find(d => parseInt(d) - 1 === leftIndex)) {
           // 展开
           if (leftIndex === this.leftOpenName - 1) {
             // 当前展开
-            y1 = leftHeaderY;
+            y1 = leftHeaderRect.centerY;
             y1 += this.drawNum * leftSpeed;
             y1 > gY1 && (y1 = gY1);
-            y1 > leftBotY && (y1 = leftBotY);
+            y1 > leftContentRect.bottom && (y1 = leftContentRect.bottom);
           } else {
             // 已展开状态
-            if (y1 < leftTopY) {
-              y1 = leftTopY;
-            } else if (y1 > leftBotY) {
-              y1 = leftBotY;
+            if (y1 < leftContentRect.top) {
+              y1 = leftContentRect.top;
+            } else if (y1 > leftContentRect.bottom) {
+              y1 = leftContentRect.bottom;
             }
           }
         } else {
           // left 当前收起
           if (leftIndex === this.leftCloseName - 1) {
-            y1 > leftBotY && (y1 = leftBotY);
-            y1 > leftHeaderY && (y1 -= this.drawNum * leftSpeed);
-            y1 < leftHeaderY && (y1 = leftHeaderY);
+            y1 > leftContentRect.bottom && (y1 = leftContentRect.bottom);
+            y1 > leftHeaderRect.centerY && (y1 -= this.drawNum * leftSpeed);
+            y1 < leftHeaderRect.centerY && (y1 = leftHeaderRect.centerY);
           } else {
             // 已收起状态
             leftIndex !== this.leftCloseName - 1 &&
-              (y1 =
-                offset(leftHeader[leftIndex]).top +
-                leftHeader[leftIndex].offsetHeight / 2);
+              (y1 = leftHeaderRect.centerY);
           }
         }
 
         /* right y2 坐标 */
         // 动画步长
-        const rightHeaderY =
-          offset(rightHeader[rightIndex]).top +
-          rightHeader[rightIndex].offsetHeight / 2;
-        const rightOffsetY = y2 - rightHeaderY;
-        const rightSpeed = rightOffsetY / (this.duration / 6);
+        const rightHeaderRect = getDomClientRect(rightHeader[rightIndex])
+        const rightToHeaderOffset = y2 - rightHeaderRect.centerY;
+        const rightSpeed = rightToHeaderOffset / (this.duration / 6);
         // 边界
-        const rightTopY = offset(rightContent[rightIndex]).top;
-        const rightBotY =
-          offset(rightContent[rightIndex]).top +
-          rightContent[rightIndex].offsetHeight;
+        const rightContentRect = getDomClientRect(rightContent[rightIndex])
         if (this.rightActiveName.find(d => parseInt(d) - 1 === rightIndex)) {
           // 当前展开
           if (rightIndex === this.rightOpenName - 1) {
-            y2 = rightHeaderY;
+            y2 = rightHeaderRect.centerY;
             y2 += this.drawNum * rightSpeed;
             y2 > gY2 && (y2 = gY2);
-            y2 > rightBotY && (y2 = rightBotY);
+            y2 > rightContentRect.bottom && (y2 = rightContentRect.bottom);
           } else {
             // 已展开状态
-            if (y2 < rightTopY) {
-              y2 = rightTopY;
-            } else if (y2 > rightBotY) {
-              y2 = rightBotY;
+            if (y2 < rightContentRect.top) {
+              y2 = rightContentRect.top;
+            } else if (y2 > rightContentRect.bottom) {
+              y2 = rightContentRect.bottom;
             }
           }
         } else {
           // right 当前收起
           if (rightIndex === this.rightCloseName - 1) {
-            y2 > rightBotY && (y2 = rightBotY);
-            y2 > rightHeaderY && (y2 -= this.drawNum * rightSpeed);
-            y2 < rightHeaderY && (y2 = rightHeaderY);
+            y2 > rightContentRect.bottom && (y2 = rightContentRect.bottom);
+            y2 > rightHeaderRect.centerY && (y2 -= this.drawNum * rightSpeed);
+            y2 < rightHeaderRect.centerY && (y2 = rightHeaderRect.centerY);
           } else {
             // 已收起状态
-            rightIndex !== this.rightCloseName - 1 &&
-              (y2 =
-                offset(rightHeader[rightIndex]).top +
-                rightHeader[rightIndex].offsetHeight / 2);
+            rightIndex !== this.rightCloseName - 1 && (y2 = rightHeaderRect.centerY);
           }
         }
 
-        line.y1 = y1 - offset(this.$el).top;
-        line.y2 = y2 - offset(this.$el).top;
+        line.y1 = y1 - this.elTop + this.scrollTop;
+        line.y2 = y2 - this.elTop + this.scrollTop;
         this.readyLines.push({
           id: line.id,
           p1: { x: line.x1, y: line.y1 },
@@ -255,6 +239,9 @@ export default {
       });
       this.drawAllLines();
     }
+  },
+  mounted() {
+    this.elTop = getDomClientRect(this.$el).top
   }
 };
 </script>

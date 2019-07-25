@@ -35,7 +35,7 @@
       v-if="popover"
       ref="popover"
       v-model="mouseenterId"
-      :position="position"
+      :referenceRect="referenceRect"
       :data="popoverContent"
       :pos="pos"
       :enterable="enterable"
@@ -49,7 +49,7 @@
 
 <script>
 import VPopover from 'components/Popover';
-import { offset } from "utils/util";
+import { getDomClientRect } from "utils/dom";
 export default {
   name: "Table",
   components: {
@@ -74,7 +74,7 @@ export default {
   data() {
     return {
       handleData: [],
-      position: {
+      referenceRect: {
         top: 0,
         center: 0,
         bottom: 0
@@ -94,7 +94,6 @@ export default {
           `${this.pos}${this.row + 1}-${i + 1}`;
         this.handleData.push({ id: id, check: false });
       });
-      this.popover && this.$refs.popover.init();
     },
     checkRow(id) {
       const index = this.handleData.findIndex(d => d.id === id);
@@ -129,11 +128,9 @@ export default {
     },
     setMouseenterTarget(node, obj, id) {
       if (!this.popover || !this.popoverContentFun) return;
-      const top = offset(node).top;
-      const left = offset(node).left;
-      const bottom = node.offsetHeight + top;
-      const center = node.offsetWidth / 2 + left;
-      this.position = { top: top, center: center, bottom: bottom };
+      const {top, left, bottom, width } = getDomClientRect(node)
+      const center = width / 2 + left;
+      this.referenceRect = { top, center, bottom };
       this.mouseenterId = id;
       this.popoverContent = this.popoverContentFun(obj);
     },

@@ -1,16 +1,23 @@
 <template>
   <span class="v-popover">
     <transition name="fade">
-      <div class="v-popover-wrap" :class="[
+      <div
+        class="v-popover-wrap"
+        :class="[
         effectClass,
         {'v-popover-wrap-top': momentPlacement === 'top'},
         {'v-popover-wrap-bottom': momentPlacement === 'bottom'},
         {'v-popover-wrap-visible': value},
         {'v-popover-wrap-hidden': !value}
-      ]" ref="popover" role="popover" :style="popoverStyle"
-      @mouseenter="mouseenter" @mouseleave="mouseleave">
+      ]"
+        ref="popover"
+        role="popover"
+        :style="popoverStyle"
+        @mouseenter="mouseenter"
+        @mouseleave="mouseleave"
+      >
         <div class="v-popover-arrow" ref="arrow"></div>
-        <v-content :data="data" />
+        <v-content :data="data"/>
       </div>
     </transition>
     <div class="v-popover-bg" v-show="enterable && showBg" ref="bg">{{showBg}}</div>
@@ -19,8 +26,7 @@
 
 <script>
 import VContent from 'components/Content';
-import { offset, scroll, getParentNodes } from "utils/util";
-import { on, off, removeBody } from "utils/dom";
+import { removeBody, getDomClientRect } from "utils/dom";
 
 export default {
   name: "Popover",
@@ -44,10 +50,10 @@ export default {
       default: "#ccc"
     },
     popoverClass: String,
-    position: {
+    referenceRect: {
       type: Object,
-      default: function() {
-        return {top: 0,center: 0, bottom: 0}
+      default: function () {
+        return { top: 0, center: 0, bottom: 0 }
       }
     },
     pos: String,
@@ -57,9 +63,6 @@ export default {
   data() {
     return {
       addedBody: false,
-      scrollTargets: [],
-      scrollTop: scroll().top,
-      scrollLeft: scroll().left,
       momentPlacement: this.placement
     };
   },
@@ -141,13 +144,6 @@ export default {
     }
   },
   methods: {
-    init() {
-      this.scrollTargets = getParentNodes(this.matchup.$el.parentNode);
-      this.scrollTargets.push(this.$el.parentNode.parentNode.parentNode);
-      this.scrollTargets.forEach(d => {
-        on(d, "scroll", this.windowScroll);
-      })
-    },
     popoverAddedBody() {
       document.body.appendChild(this.$refs.popover)
       this.addedBody = true;
@@ -166,44 +162,45 @@ export default {
       let popoverTop;
       let arrowTop;
       let bgTop;
-      this.changeDirection(popover);
+
+      const popoverRect = getDomClientRect(popover)
+      this.changeDirection(popoverRect);
       switch (this.momentPlacement) {
         case 'top':
-          popoverTop = this.position.top - popover.offsetHeight - 10;
-          arrowTop = this.position.top - 11;
-          bgTop = this.position.top - 10;
+          popoverTop = this.referenceRect.top - popoverRect.height - 10;
+          arrowTop = this.referenceRect.top - 11;
+          bgTop = this.referenceRect.top - 10;
           break;
         case 'bottom':
-          popoverTop = this.position.bottom + 10;
-          arrowTop = this.position.bottom - 2;
-          bgTop = this.position.bottom;
+          popoverTop = this.referenceRect.bottom + 10;
+          arrowTop = this.referenceRect.bottom - 2;
+          bgTop = this.referenceRect.bottom;
           break;
-      
+
         default:
           console.error("Wrong placement must top/bottom");
           break;
       }
-      let popoverLeft = this.position.center - popover.offsetWidth / 2;
-      const matchup = this.matchup.$refs.matchup;
-      const matchupLeft = offset(matchup).left;
-      const matchupRight = matchupLeft + matchup.offsetWidth;
+      let popoverLeft = this.referenceRect.center - popoverRect.width / 2;
+      const matchuprRect = getDomClientRect(this.matchup.$refs.matchup)
+      // 限制 popover 不超出左侧或右侧
       if (this.pos === 'L') {
-        popoverLeft < matchupLeft && (popoverLeft = matchupLeft)
+        popoverLeft < matchuprRect.left && (popoverLeft = matchuprRect.left)
       } else {
-        popoverLeft + popover.offsetWidth > matchupRight && (popoverLeft = matchupRight - popover.offsetWidth)
+        popoverLeft + popoverRect.width > matchuprRect.right && (popoverLeft = matchuprRect.right - popoverRect.width)
       }
-      arrow.style.top = arrowTop - this.scrollTop + "px";
-      arrow.style.left = this.position.center + "px";
-      popover.style.top = popoverTop - this.scrollTop + "px";
-      bg.style.top = bgTop - this.scrollTop + 'px';
+      arrow.style.top = arrowTop + "px";
+      arrow.style.left = this.referenceRect.center + "px";
+      popover.style.top = popoverTop + "px";
+      bg.style.top = bgTop + 'px';
       bg.style.left = popover.style.left = popoverLeft + "px";
-      bg.style.width = popover.offsetWidth + "px";
+      bg.style.width = popoverRect.width + "px";
     },
-    changeDirection(popover) {
-      const allHeight = this.position.bottom + popover.offsetHeight + 5;
+    changeDirection(popoverRect) {
+      const allHeight = this.referenceRect.bottom + popoverRect.height + 5;
       switch (this.placement) {
         case "top":
-          if (this.position.top - popover.offsetHeight - 5 - this.scrollTop < 10) {
+          if (this.referenceRect.top - popoverRect.height - 5 < 10) {
             this.momentPlacement = 'bottom';
           } else {
             this.momentPlacement = 'top';
@@ -219,26 +216,11 @@ export default {
         default:
           break;
       }
-    },
-    windowScroll() {
-      this.scrollTop = scroll().top;
-      this.scrollLeft = scroll().left;
-      this.scrollTargets.forEach(d => {
-        this.scrollTop += d.scrollTop;
-        this.scrollLeft += d.scrollLeft;
-      })
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.init();
-      this.windowScroll();
-    })
   },
   beforeDestroy() {
-    this.scrollTargets.forEach(d => {
-      off(d, "scroll", this.windowScroll);
-    })
     removeBody(this, 'popover');
   }
 };

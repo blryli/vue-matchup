@@ -2,7 +2,7 @@
   <div class="collapse-item" :style="{'--duration': `${duration/1050}s`}">
     <div ref="header" class="collapse-item__header" :class="{active: active}" @click="change">
       {{title}}
-      <div class="collapse-item__header-handle" @click="clear">清空</div>
+      <div class="collapse-item__header-handle" @click="clear">清除选中</div>
     </div>
     <div
       class="collapse-item__wrap"
@@ -134,17 +134,9 @@ export default {
   }
   .collapse-item__header-handle {
     position: absolute;
-    top: -100%;
-    transition: top 0.3s, opacity 0.3s;
+    top: 0;
     right: 40px;
-    opacity: 0;
     color: #139bd2;
-  }
-  &:hover {
-    .collapse-item__header-handle {
-      top: 0;
-      opacity: 1;
-    }
   }
 }
 .collapse-item__content {

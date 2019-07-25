@@ -65,15 +65,7 @@ export default {
       },
       items: [],
       decItems: [],
-      lines: [
-        { leftId: "L1-1", rightId: "R1-5" },
-        { leftId: "L1-3", rightId: "R1-2" },
-        { leftId: "L1-9", rightId: "R1-1" },
-        { leftId: "L1-2", rightId: "R2-1" },
-        { leftId: "L1-15", rightId: "R2-6" },
-        { leftId: "L1-18", rightId: "R2-12" },
-        { leftId: "L1-2", rightId: "R2-7" }
-      ],
+      lines: [],
       finishLines: [],
       leftData: [],
       rightData: [],
@@ -127,14 +119,16 @@ export default {
     },
     // 连接的方法
     link() {
-      this.$refs.matchup.link();
+      const data = mock.mock({
+        'color': /red|green|#139bd2/
+      })
+      this.$refs.matchup.link({color: data.color});
     },
     linkLine() {
-      this.$refs.matchup.link(["L1-1"], ["R1-3"], line => (line.color = "red"));
       this.$refs.matchup.link(
-        ["L1-2", "L1-3"],
-        ["R1-4"],
-        line => (line.color = "red")
+        {leftIds: ["L1-2", "L1-3", "L1-1"],
+        rightIds: ["R1-4"],
+        color: "red"}
       );
     },
     // 选中线的方法
@@ -204,9 +198,13 @@ export default {
           gw: { 'weight|100-500': 100, unit: /kg|g|ml/ }
         }]
       })
+      const lines = mock.mock({
+        'array|5-8': [{ leftId: /L1-([1-9]|[1-2][0-9])/, rightId: /R1-([1-9]|1[0-9])|R2-([1-9]|1[0-4])/, color: /red|green|#139bd2/ }]
+      })
       setTimeout(() => {
-        this.decItems = [decItems(15).array, decItems(12).array]
-        this.items = [items(20).array];
+        this.decItems = [decItems(20).array, decItems(14).array]
+        this.items = [items(30).array];
+        this.lines = lines.array
       }, 1000);
     });
   }
@@ -214,8 +212,11 @@ export default {
 </script>
 
 <style>
+body{
+  /* height: 120vh; */
+}
 .collapse-item__wrap {
-  max-height: 400px;
+  max-height: 620px;
 }
 #app {
   /* height: 600px; */

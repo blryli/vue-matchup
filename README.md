@@ -115,6 +115,7 @@ export default {
 
 |  方法名 |    说明                    |   参数      |
 |-------- |------                      |------       |
+|link    | 连接线的方法            |    {leftIds, rightIds, color}    |
 |drawLine    | 重绘线            |-       |
 |leftCheckRow    | 左面板选中行的方法，参数为row的id            |id      |
 |rightCheckRow    | 右面板选中行的方法，参数为row的id            |id      |
@@ -122,6 +123,8 @@ export default {
 |checkLines    | 选中线的方法，参数为要选中线条id组成的数组            | array      |
 |unCheckedLines    | 用于取消线的选中状态的方法，参数为要清除线条id组成的数组            | array      |
 |clearCheckedLines    | 用于清空选中线的方法            | -      |
+
+> 线的连接可以自定义，控制lines的增删来控制线，由于vue2.0还不能监听数组变化，因此需要用push,splice等方法操作数组。
 
 ### Events
 
@@ -136,6 +139,10 @@ export default {
 |delete | 删除线条时触发该事件 | id    |
 
 ### 版本
+
+#### 1.0.29
+
+- 整合解决滚动导致偏移的问题。
 
 #### 1.0.28
 

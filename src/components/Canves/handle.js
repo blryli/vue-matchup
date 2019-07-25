@@ -1,12 +1,9 @@
 import {
-  offset,
-  scroll,
-  getParentNodes
-} from "../../utils/util";
-import {
   on,
-  off
-} from "../../utils/dom";
+  off,
+  getDomClientRect,
+  getParentNodes
+} from "utils/dom";
 
 export default {
   data() {
@@ -17,8 +14,8 @@ export default {
       lineCheckedIdsOld: [],
       readyLines: [],
       scrollTargets: [],
-      scrollTop: scroll().top,
-      scrollLeft: scroll().left,
+      scrollTop: 0,
+      scrollLeft: 0,
       cacheCanvas: null
     }
   },
@@ -26,11 +23,11 @@ export default {
     lineCheckedId(val, oldVal) {
       this.drawAllLines();
       if (val !== oldVal) {
-        if(oldVal) {
+        if (oldVal) {
           this._toggleTableRows(oldVal, 'remove')
           this.$emit('unCheckLine', oldVal)
         }
-        if(val) {
+        if (val) {
           this._toggleTableRows(val, 'add')
           this.$emit('checkLine', val)
         }
@@ -110,8 +107,8 @@ export default {
     },
     inLine(e, type) {
       // 鼠标点击的坐标
-      const px = e.clientX - offset(this.$refs.canvas).left + this.scrollLeft;
-      const py = e.clientY - offset(this.$refs.canvas).top + this.scrollTop;
+      const px = e.clientX - getDomClientRect(this.$refs.canvas).left
+      const py = e.clientY - getDomClientRect(this.$refs.canvas).top
 
       // 逐条线确定是否有点中
       const lineOffset = 5; // 可接受（偏移）范围
@@ -197,7 +194,7 @@ export default {
       this.drawAllLines();
     },
     // 选中线时对应的table列高亮选中
-    _toggleTableRows(lineIds,type) {
+    _toggleTableRows(lineIds, type) {
       lineIds = Array.isArray(lineIds) ? lineIds : [lineIds]
       lineIds.forEach(lineId => {
         const ids = lineId.split('--')
@@ -206,11 +203,13 @@ export default {
       })
     },
     windowScroll() {
-      this.scrollTop = scroll().top;
-      this.scrollLeft = scroll().left;
+      this.scrollTop = 0;
+      this.scrollLeft = 0;
       this.scrollTargets.forEach(d => {
-        this.scrollTop += d.scrollTop;
-        this.scrollLeft += d.scrollLeft;
+        const scrollTop = d === window ? window.pageYOffset : d.scrollTop
+        const scrollLeft = d === window ? window.pageXOffset : d.scrollLeft
+        this.scrollTop += scrollTop;
+        this.scrollLeft += scrollLeft;
       })
     }
   },

@@ -41,11 +41,3 @@ export const scroll = function () {
   }
 }
 
-export const getParentNodes = function (parent) {
-  let parentNodes = [document.body];
-  while (parent !== document.body) {
-    parentNodes.push(parent);
-    parent = parent.parentNode;
-  }
-  return parentNodes;
-}

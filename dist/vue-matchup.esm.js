@@ -1,3 +1,5 @@
+import 'timers';
+
 //
 //
 //
@@ -261,7 +263,7 @@ var __vue_render__$1 = function __vue_render__() {
   }, [_vm._v("\n    " + _vm._s(_vm.title) + "\n    "), _c("div", {
     staticClass: "collapse-item__header-handle",
     on: { click: _vm.clear }
-  }, [_vm._v("清空")])]), _vm._v(" "), _c("div", {
+  }, [_vm._v("清除选中")])]), _vm._v(" "), _c("div", {
     staticClass: "collapse-item__wrap",
     class: { active: _vm.active },
     style: {
@@ -281,7 +283,7 @@ __vue_render__$1._withStripped = true;
 /* style */
 var __vue_inject_styles__$1 = undefined;
 /* scoped */
-var __vue_scope_id__$1 = "data-v-5686f06b";
+var __vue_scope_id__$1 = "data-v-4951c372";
 /* module identifier */
 var __vue_module_identifier__$1 = undefined;
 /* functional template */
@@ -320,48 +322,6 @@ var __vue_is_functional_template__$2 = undefined;
 /* style inject SSR */
 
 var Main$2 = normalizeComponent_1({}, __vue_inject_styles__$2, __vue_script__$2, __vue_scope_id__$2, __vue_is_functional_template__$2, __vue_module_identifier__$2, undefined, undefined);
-
-var offset = function offset(target) {
-  if (!target || !target.offsetParent) return false;
-  var top = 0;
-  var left = 0;
-  while (target.offsetParent) {
-    top += target.offsetTop;
-    left += target.offsetLeft;
-    target = target.offsetParent;
-  }
-  return {
-    top: top,
-    left: left
-  };
-};
-
-var scroll = function scroll() {
-  if (window.pageYOffset != null) {
-    return {
-      left: window.pageXOffset,
-      top: window.pageYOffset
-    };
-  } else if (document.compatMode == 'CSS1Compat') {
-    return {
-      left: document.documentElement.scrollLeft,
-      top: document.documentElement.scrollTop
-    };
-  }
-  return {
-    left: document.body.scrollLeft,
-    top: document.body.scrollTop
-  };
-};
-
-var getParentNodes = function getParentNodes(parent) {
-  var parentNodes = [document.body];
-  while (parent !== document.body) {
-    parentNodes.push(parent);
-    parent = parent.parentNode;
-  }
-  return parentNodes;
-};
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -8081,12 +8041,55 @@ var off = function () {
   }
 }();
 
+/**
+ * 删除节点
+ * @param {content} self 
+ * @param {node ref} ref 
+ */
 var removeBody = function removeBody(self, ref) {
-  if (self.$refs[ref] && self.$refs[ref].$el && self.$refs[ref].$el.parentNode === document.body) {
-    document.body.removeChild(self.$refs[ref].$el);
-  } else if (self.$refs[ref] && self.$refs[ref].parentNode === document.body) {
-    document.body.removeChild(self.$refs[ref]);
+  var pos = self.$refs[ref];
+  if (pos && pos.$el && pos.$el.parentNode === document.body) {
+    document.body.removeChild(pos.$el);
+  } else if (pos && pos.parentNode === document.body) {
+    document.body.removeChild(pos);
   }
+};
+
+/**
+ * 获取所有父节点
+ * @param {documentElement} node 
+ */
+var getParentNodes = function getParentNodes(node) {
+  var parentNodes = [window];
+  while (node !== document.body) {
+    parentNodes.push(node);
+    if (!node.parentNode || node.parentNode.name) return parentNodes;
+    node = node.parentNode;
+  }
+  return parentNodes;
+};
+
+/**
+ * * 获取节点 getBoundingClientRect
+ * @param {节点} target 
+ */
+var getDomClientRect = function getDomClientRect(target) {
+  var targetRect = target.getBoundingClientRect();
+  var top = targetRect.top;
+  var bottom = targetRect.bottom;
+  var left = targetRect.left;
+  var right = targetRect.right;
+  var width = targetRect.width || right - left;
+  var height = targetRect.height || bottom - top;
+  return {
+    width: width,
+    height: height,
+    top: top,
+    right: right,
+    bottom: bottom,
+    left: left,
+    centerY: top + height / 2
+  };
 };
 
 var _typeof$1 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -8113,7 +8116,7 @@ var script$3 = {
       default: "#ccc"
     },
     popoverClass: String,
-    position: {
+    referenceRect: {
       type: Object,
       default: function _default() {
         return { top: 0, center: 0, bottom: 0 };
@@ -8126,9 +8129,6 @@ var script$3 = {
   data: function data() {
     return {
       addedBody: false,
-      scrollTargets: [],
-      scrollTop: scroll().top,
-      scrollLeft: scroll().left,
       momentPlacement: this.placement
     };
   },
@@ -8209,15 +8209,6 @@ var script$3 = {
     }
   },
   methods: {
-    init: function init() {
-      var _this2 = this;
-
-      this.scrollTargets = getParentNodes(this.matchup.$el.parentNode);
-      this.scrollTargets.push(this.$el.parentNode.parentNode.parentNode);
-      this.scrollTargets.forEach(function (d) {
-        on(d, "scroll", _this2.windowScroll);
-      });
-    },
     popoverAddedBody: function popoverAddedBody() {
       document.body.appendChild(this.$refs.popover);
       this.addedBody = true;
@@ -8236,44 +8227,45 @@ var script$3 = {
       var popoverTop = void 0;
       var arrowTop = void 0;
       var bgTop = void 0;
-      this.changeDirection(popover);
+
+      var popoverRect = getDomClientRect(popover);
+      this.changeDirection(popoverRect);
       switch (this.momentPlacement) {
         case 'top':
-          popoverTop = this.position.top - popover.offsetHeight - 10;
-          arrowTop = this.position.top - 11;
-          bgTop = this.position.top - 10;
+          popoverTop = this.referenceRect.top - popoverRect.height - 10;
+          arrowTop = this.referenceRect.top - 11;
+          bgTop = this.referenceRect.top - 10;
           break;
         case 'bottom':
-          popoverTop = this.position.bottom + 10;
-          arrowTop = this.position.bottom - 2;
-          bgTop = this.position.bottom;
+          popoverTop = this.referenceRect.bottom + 10;
+          arrowTop = this.referenceRect.bottom - 2;
+          bgTop = this.referenceRect.bottom;
           break;
 
         default:
           console.error("Wrong placement must top/bottom");
           break;
       }
-      var popoverLeft = this.position.center - popover.offsetWidth / 2;
-      var matchup = this.matchup.$refs.matchup;
-      var matchupLeft = offset(matchup).left;
-      var matchupRight = matchupLeft + matchup.offsetWidth;
+      var popoverLeft = this.referenceRect.center - popoverRect.width / 2;
+      var matchuprRect = getDomClientRect(this.matchup.$refs.matchup);
+      // 限制 popover 不超出左侧或右侧
       if (this.pos === 'L') {
-        popoverLeft < matchupLeft && (popoverLeft = matchupLeft);
+        popoverLeft < matchuprRect.left && (popoverLeft = matchuprRect.left);
       } else {
-        popoverLeft + popover.offsetWidth > matchupRight && (popoverLeft = matchupRight - popover.offsetWidth);
+        popoverLeft + popoverRect.width > matchuprRect.right && (popoverLeft = matchuprRect.right - popoverRect.width);
       }
-      arrow.style.top = arrowTop - this.scrollTop + "px";
-      arrow.style.left = this.position.center + "px";
-      popover.style.top = popoverTop - this.scrollTop + "px";
-      bg.style.top = bgTop - this.scrollTop + 'px';
+      arrow.style.top = arrowTop + "px";
+      arrow.style.left = this.referenceRect.center + "px";
+      popover.style.top = popoverTop + "px";
+      bg.style.top = bgTop + 'px';
       bg.style.left = popover.style.left = popoverLeft + "px";
-      bg.style.width = popover.offsetWidth + "px";
+      bg.style.width = popoverRect.width + "px";
     },
-    changeDirection: function changeDirection(popover) {
-      var allHeight = this.position.bottom + popover.offsetHeight + 5;
+    changeDirection: function changeDirection(popoverRect) {
+      var allHeight = this.referenceRect.bottom + popoverRect.height + 5;
       switch (this.placement) {
         case "top":
-          if (this.position.top - popover.offsetHeight - 5 - this.scrollTop < 10) {
+          if (this.referenceRect.top - popoverRect.height - 5 < 10) {
             this.momentPlacement = 'bottom';
           } else {
             this.momentPlacement = 'top';
@@ -8289,32 +8281,10 @@ var script$3 = {
         default:
           break;
       }
-    },
-    windowScroll: function windowScroll() {
-      var _this3 = this;
-
-      this.scrollTop = scroll().top;
-      this.scrollLeft = scroll().left;
-      this.scrollTargets.forEach(function (d) {
-        _this3.scrollTop += d.scrollTop;
-        _this3.scrollLeft += d.scrollLeft;
-      });
     }
   },
-  mounted: function mounted() {
-    var _this4 = this;
-
-    this.$nextTick(function () {
-      _this4.init();
-      _this4.windowScroll();
-    });
-  },
+  mounted: function mounted() {},
   beforeDestroy: function beforeDestroy() {
-    var _this5 = this;
-
-    this.scrollTargets.forEach(function (d) {
-      off(d, "scroll", _this5.windowScroll);
-    });
     removeBody(this, 'popover');
   }
 };
@@ -8350,7 +8320,7 @@ __vue_render__$2._withStripped = true;
 /* style */
 var __vue_inject_styles__$3 = undefined;
 /* scoped */
-var __vue_scope_id__$3 = "data-v-007459c8";
+var __vue_scope_id__$3 = "data-v-b04b0b30";
 /* module identifier */
 var __vue_module_identifier__$3 = undefined;
 /* functional template */
@@ -8386,7 +8356,7 @@ var script$4 = {
   data: function data() {
     return {
       handleData: [],
-      position: {
+      referenceRect: {
         top: 0,
         center: 0,
         bottom: 0
@@ -8407,7 +8377,6 @@ var script$4 = {
         var id = _this.idFun && _this.idFun(d, _this.row + 1) || "" + _this.pos + (_this.row + 1) + "-" + (i + 1);
         _this.handleData.push({ id: id, check: false });
       });
-      this.popover && this.$refs.popover.init();
     },
     checkRow: function checkRow(id) {
       var index = this.handleData.findIndex(function (d) {
@@ -8442,11 +8411,15 @@ var script$4 = {
     },
     setMouseenterTarget: function setMouseenterTarget(node, obj, id) {
       if (!this.popover || !this.popoverContentFun) return;
-      var top = offset(node).top;
-      var left = offset(node).left;
-      var bottom = node.offsetHeight + top;
-      var center = node.offsetWidth / 2 + left;
-      this.position = { top: top, center: center, bottom: bottom };
+
+      var _getDomClientRect = getDomClientRect(node),
+          top = _getDomClientRect.top,
+          left = _getDomClientRect.left,
+          bottom = _getDomClientRect.bottom,
+          width = _getDomClientRect.width;
+
+      var center = width / 2 + left;
+      this.referenceRect = { top: top, center: center, bottom: bottom };
       this.mouseenterId = id;
       this.popoverContent = this.popoverContentFun(obj);
     },
@@ -8526,7 +8499,7 @@ var __vue_render__$3 = function __vue_render__() {
   }), 0)]), _vm._v(" "), _vm.popover ? _c("v-popover", {
     ref: "popover",
     attrs: {
-      position: _vm.position,
+      referenceRect: _vm.referenceRect,
       data: _vm.popoverContent,
       pos: _vm.pos,
       enterable: _vm.enterable,
@@ -8556,7 +8529,7 @@ __vue_render__$3._withStripped = true;
 /* style */
 var __vue_inject_styles__$4 = undefined;
 /* scoped */
-var __vue_scope_id__$4 = "data-v-2951e155";
+var __vue_scope_id__$4 = "data-v-1c166e2d";
 /* module identifier */
 var __vue_module_identifier__$4 = undefined;
 /* functional template */
@@ -8678,8 +8651,8 @@ var Handle = {
       lineCheckedIdsOld: [],
       readyLines: [],
       scrollTargets: [],
-      scrollTop: scroll().top,
-      scrollLeft: scroll().left,
+      scrollTop: 0,
+      scrollLeft: 0,
       cacheCanvas: null
     };
   },
@@ -8781,8 +8754,8 @@ var Handle = {
     },
     inLine: function inLine(e, type) {
       // 鼠标点击的坐标
-      var px = e.clientX - offset(this.$refs.canvas).left + this.scrollLeft;
-      var py = e.clientY - offset(this.$refs.canvas).top + this.scrollTop;
+      var px = e.clientX - getDomClientRect(this.$refs.canvas).left;
+      var py = e.clientY - getDomClientRect(this.$refs.canvas).top;
 
       // 逐条线确定是否有点中
       var lineOffset = 5; // 可接受（偏移）范围
@@ -8895,11 +8868,13 @@ var Handle = {
     windowScroll: function windowScroll() {
       var _this6 = this;
 
-      this.scrollTop = scroll().top;
-      this.scrollLeft = scroll().left;
+      this.scrollTop = 0;
+      this.scrollLeft = 0;
       this.scrollTargets.forEach(function (d) {
-        _this6.scrollTop += d.scrollTop;
-        _this6.scrollLeft += d.scrollLeft;
+        var scrollTop = d === window ? window.pageYOffset : d.scrollTop;
+        var scrollLeft = d === window ? window.pageXOffset : d.scrollLeft;
+        _this6.scrollTop += scrollTop;
+        _this6.scrollLeft += scrollLeft;
       });
     }
   },
@@ -8967,6 +8942,7 @@ var script$5 = {
   },
   data: function data() {
     return {
+      elTop: 0,
       canvas: "",
       ctx: "",
       leftActiveNameOld: JSON.parse(JSON.stringify(this.leftActiveName)),
@@ -9073,90 +9049,90 @@ var script$5 = {
         line.x1 = 5;
         line.x2 = _this4.width - 6;
         line.color = line.color || "#555";
-        var y1 = offset(leftItem).top + leftItem.offsetHeight / 2 - leftContent[leftIndex].scrollTop;
+        var leftRect = getDomClientRect(leftItem);
+        var y1 = leftRect.centerY;
         var gY1 = y1;
-        var y2 = offset(rightItem).top + rightItem.offsetHeight / 2 - rightContent[rightIndex].scrollTop;
+        var rightRect = getDomClientRect(rightItem);
+        var y2 = rightRect.centerY;
         var gY2 = y2;
 
         _this4.drawNum++;
         var collapseMaxHeight = _this4.$parent.$props.collapseMaxHeight;
         /* left y1 坐标 */
         // 动画步长
-        var leftHeaderY = offset(leftHeader[leftIndex]).top + leftHeader[leftIndex].offsetHeight / 2;
-        var leftOffsetY = y1 - leftHeaderY;
-        var leftSpeed = leftOffsetY / (_this4.duration / 6);
+        var leftHeaderRect = getDomClientRect(leftHeader[leftIndex]);
+        var leftToHeaderOffset = y1 - leftHeaderRect.centerY; // left节点到 header 中点的距离
+        var leftSpeed = leftToHeaderOffset / (_this4.duration / 6);
         // 边界
-        var leftTopY = offset(leftContent[leftIndex]).top;
-        var leftBotY = offset(leftContent[leftIndex]).top + leftContent[leftIndex].offsetHeight;
+        var leftContentRect = getDomClientRect(leftContent[leftIndex]);
         if (_this4.leftActiveName.find(function (d) {
           return parseInt(d) - 1 === leftIndex;
         })) {
           // 展开
           if (leftIndex === _this4.leftOpenName - 1) {
             // 当前展开
-            y1 = leftHeaderY;
+            y1 = leftHeaderRect.centerY;
             y1 += _this4.drawNum * leftSpeed;
             y1 > gY1 && (y1 = gY1);
-            y1 > leftBotY && (y1 = leftBotY);
+            y1 > leftContentRect.bottom && (y1 = leftContentRect.bottom);
           } else {
             // 已展开状态
-            if (y1 < leftTopY) {
-              y1 = leftTopY;
-            } else if (y1 > leftBotY) {
-              y1 = leftBotY;
+            if (y1 < leftContentRect.top) {
+              y1 = leftContentRect.top;
+            } else if (y1 > leftContentRect.bottom) {
+              y1 = leftContentRect.bottom;
             }
           }
         } else {
           // left 当前收起
           if (leftIndex === _this4.leftCloseName - 1) {
-            y1 > leftBotY && (y1 = leftBotY);
-            y1 > leftHeaderY && (y1 -= _this4.drawNum * leftSpeed);
-            y1 < leftHeaderY && (y1 = leftHeaderY);
+            y1 > leftContentRect.bottom && (y1 = leftContentRect.bottom);
+            y1 > leftHeaderRect.centerY && (y1 -= _this4.drawNum * leftSpeed);
+            y1 < leftHeaderRect.centerY && (y1 = leftHeaderRect.centerY);
           } else {
             // 已收起状态
-            leftIndex !== _this4.leftCloseName - 1 && (y1 = offset(leftHeader[leftIndex]).top + leftHeader[leftIndex].offsetHeight / 2);
+            leftIndex !== _this4.leftCloseName - 1 && (y1 = leftHeaderRect.centerY);
           }
         }
 
         /* right y2 坐标 */
         // 动画步长
-        var rightHeaderY = offset(rightHeader[rightIndex]).top + rightHeader[rightIndex].offsetHeight / 2;
-        var rightOffsetY = y2 - rightHeaderY;
-        var rightSpeed = rightOffsetY / (_this4.duration / 6);
+        var rightHeaderRect = getDomClientRect(rightHeader[rightIndex]);
+        var rightToHeaderOffset = y2 - rightHeaderRect.centerY;
+        var rightSpeed = rightToHeaderOffset / (_this4.duration / 6);
         // 边界
-        var rightTopY = offset(rightContent[rightIndex]).top;
-        var rightBotY = offset(rightContent[rightIndex]).top + rightContent[rightIndex].offsetHeight;
+        var rightContentRect = getDomClientRect(rightContent[rightIndex]);
         if (_this4.rightActiveName.find(function (d) {
           return parseInt(d) - 1 === rightIndex;
         })) {
           // 当前展开
           if (rightIndex === _this4.rightOpenName - 1) {
-            y2 = rightHeaderY;
+            y2 = rightHeaderRect.centerY;
             y2 += _this4.drawNum * rightSpeed;
             y2 > gY2 && (y2 = gY2);
-            y2 > rightBotY && (y2 = rightBotY);
+            y2 > rightContentRect.bottom && (y2 = rightContentRect.bottom);
           } else {
             // 已展开状态
-            if (y2 < rightTopY) {
-              y2 = rightTopY;
-            } else if (y2 > rightBotY) {
-              y2 = rightBotY;
+            if (y2 < rightContentRect.top) {
+              y2 = rightContentRect.top;
+            } else if (y2 > rightContentRect.bottom) {
+              y2 = rightContentRect.bottom;
             }
           }
         } else {
           // right 当前收起
           if (rightIndex === _this4.rightCloseName - 1) {
-            y2 > rightBotY && (y2 = rightBotY);
-            y2 > rightHeaderY && (y2 -= _this4.drawNum * rightSpeed);
-            y2 < rightHeaderY && (y2 = rightHeaderY);
+            y2 > rightContentRect.bottom && (y2 = rightContentRect.bottom);
+            y2 > rightHeaderRect.centerY && (y2 -= _this4.drawNum * rightSpeed);
+            y2 < rightHeaderRect.centerY && (y2 = rightHeaderRect.centerY);
           } else {
             // 已收起状态
-            rightIndex !== _this4.rightCloseName - 1 && (y2 = offset(rightHeader[rightIndex]).top + rightHeader[rightIndex].offsetHeight / 2);
+            rightIndex !== _this4.rightCloseName - 1 && (y2 = rightHeaderRect.centerY);
           }
         }
 
-        line.y1 = y1 - offset(_this4.$el).top;
-        line.y2 = y2 - offset(_this4.$el).top;
+        line.y1 = y1 - _this4.elTop + _this4.scrollTop;
+        line.y2 = y2 - _this4.elTop + _this4.scrollTop;
         _this4.readyLines.push({
           id: line.id,
           p1: { x: line.x1, y: line.y1 },
@@ -9166,6 +9142,9 @@ var script$5 = {
       });
       this.drawAllLines();
     }
+  },
+  mounted: function mounted() {
+    this.elTop = getDomClientRect(this.$el).top;
   }
 };
 
@@ -9213,7 +9192,7 @@ __vue_render__$4._withStripped = true;
 /* style */
 var __vue_inject_styles__$5 = undefined;
 /* scoped */
-var __vue_scope_id__$5 = "data-v-28cbf310";
+var __vue_scope_id__$5 = "data-v-b1d43706";
 /* module identifier */
 var __vue_module_identifier__$5 = undefined;
 /* functional template */
@@ -9241,36 +9220,41 @@ var Handle$1 = {
 
   methods: {
     // 连接线的方法
-    link: function link(leftCheckedIds, rightCheckedIds) {
+    link: function link(obj) {
       var _this = this;
 
-      leftCheckedIds = leftCheckedIds || this.leftCheckedIds;
-      rightCheckedIds = rightCheckedIds || this.rightCheckedIds;
-      if (leftCheckedIds.length === 1 && rightCheckedIds.length === 1) {
-        var leftId = leftCheckedIds[0];
-        var rightId = rightCheckedIds[0];
-        this.doLine(leftId, rightId);
+      var _obj$leftIds = obj.leftIds,
+          leftIds = _obj$leftIds === undefined ? this.leftCheckedIds : _obj$leftIds,
+          _obj$rightIds = obj.rightIds,
+          rightIds = _obj$rightIds === undefined ? this.rightCheckedIds : _obj$rightIds,
+          color = obj.color;
+
+      if (leftIds.length === 1 && rightIds.length === 1) {
+        var leftId = leftIds[0];
+        var rightId = rightIds[0];
+        this.doLine(leftId, rightId, color);
       }
-      if (leftCheckedIds.length > 1 && rightCheckedIds.length === 1) {
-        leftCheckedIds.forEach(function (d) {
+      if (leftIds.length > 1 && rightIds.length === 1) {
+        leftIds.forEach(function (d) {
           var leftId = d;
-          var rightId = rightCheckedIds[0];
-          _this.doLine(leftId, rightId);
+          var rightId = rightIds[0];
+          _this.doLine(leftId, rightId, color);
         });
       }
-      if (leftCheckedIds.length === 1 && rightCheckedIds.length > 1) {
-        rightCheckedIds.forEach(function (d) {
-          var leftId = leftCheckedIds[0];
+      if (leftIds.length === 1 && rightIds.length > 1) {
+        rightIds.forEach(function (d) {
+          var leftId = leftIds[0];
           var rightId = d;
-          _this.doLine(leftId, rightId);
+          _this.doLine(leftId, rightId, color);
         });
       }
       this.clearChecked();
     },
-    doLine: function doLine(leftId, rightId) {
+    doLine: function doLine(leftId, rightId, color) {
       var line = {
         leftId: leftId,
-        rightId: rightId
+        rightId: rightId,
+        color: color
       };
       this.lines.push(line);
       this.$emit('input', this.lines);

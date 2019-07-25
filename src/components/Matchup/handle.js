@@ -14,34 +14,34 @@ export default {
   },
   methods: {
     // 连接线的方法
-    link(leftCheckedIds, rightCheckedIds) {
-      leftCheckedIds = leftCheckedIds || this.leftCheckedIds;
-      rightCheckedIds = rightCheckedIds || this.rightCheckedIds;
-      if (leftCheckedIds.length === 1 && rightCheckedIds.length === 1) {
-        const leftId = leftCheckedIds[0];
-        const rightId = rightCheckedIds[0];
-        this.doLine(leftId, rightId);
+    link(obj) {
+      const {leftIds = this.leftCheckedIds, rightIds = this.rightCheckedIds, color} = obj
+      if (leftIds.length === 1 && rightIds.length === 1) {
+        const leftId = leftIds[0];
+        const rightId = rightIds[0];
+        this.doLine(leftId, rightId, color);
       }
-      if (leftCheckedIds.length > 1 && rightCheckedIds.length === 1) {
-        leftCheckedIds.forEach(d => {
+      if (leftIds.length > 1 && rightIds.length === 1) {
+        leftIds.forEach(d => {
           const leftId = d;
-          const rightId = rightCheckedIds[0];
-          this.doLine(leftId, rightId);
+          const rightId = rightIds[0];
+          this.doLine(leftId, rightId, color);
         });
       }
-      if (leftCheckedIds.length === 1 && rightCheckedIds.length > 1) {
-        rightCheckedIds.forEach(d => {
-          const leftId = leftCheckedIds[0];
+      if (leftIds.length === 1 && rightIds.length > 1) {
+        rightIds.forEach(d => {
+          const leftId = leftIds[0];
           const rightId = d;
-          this.doLine(leftId, rightId);
+          this.doLine(leftId, rightId, color);
         });
       }
       this.clearChecked();
     },
-    doLine(leftId, rightId) {
+    doLine(leftId, rightId, color) {
       let line = {
-        leftId: leftId,
-        rightId: rightId
+        leftId,
+        rightId,
+        color
       };
       this.lines.push(line);
       this.$emit('input', this.lines)
@@ -60,12 +60,12 @@ export default {
     // 选中行的回调
     leftCheckChange(checkeds, i) {
       this.leftChecked.splice(i, 1, checkeds);
-      this.leftCheckedIds = [].concat.apply([],this.leftChecked);
+      this.leftCheckedIds = [].concat.apply([], this.leftChecked);
       this.$emit('leftCheckChange', this.leftCheckedIds)
     },
     rightCheckChange(checkeds, i) {
       this.rightChecked.splice(i, 1, checkeds);
-      this.rightCheckedIds = [].concat.apply([],this.rightChecked);
+      this.rightCheckedIds = [].concat.apply([], this.rightChecked);
       this.$emit('rightCheckChange', this.rightCheckedIds)
     },
     // 选中行的方法
