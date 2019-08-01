@@ -21,21 +21,15 @@
 </template>
 
 <script>
-import { offset } from "utils/util";
 import { getDomClientRect, getParentNodes, enableEventListener, removeEventListener } from "utils/dom";
 import Graph from "./graph";
 import Handle from "./handle";
-import { setTimeout } from 'timers';
 
 export default {
   name: "Canves",
   mixins: [Graph, Handle],
   props: {
     width: Number,
-    offset: {
-      type: Number,
-      default: 5
-    },
     value: {
       type: Array,
       default: () => []
@@ -241,7 +235,9 @@ export default {
     }
   },
   mounted() {
-    this.elTop = getDomClientRect(this.$el).top
+    this.$nextTick(() => {
+      this.elTop = getDomClientRect(this.$el).top
+    })
   }
 };
 </script>

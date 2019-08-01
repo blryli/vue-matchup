@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import { getDomClientRect } from "utils/dom";
+
 export default {
   name: "CollapseItem",
   props: {
@@ -81,8 +83,8 @@ export default {
       }
     },
     init() {
-      this.headerHeight = this.$refs.header.offsetHeight;
-      this.contentHeight = this.$slots.default[0].elm.offsetHeight;
+      this.headerHeight = getDomClientRect(this.$refs.header).height;
+      this.contentHeight = getDomClientRect(this.$slots.default[0].elm).height;
       this.active = !!this.activeName.find(d => d === this.name);
     },
     clear(e) {

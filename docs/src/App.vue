@@ -3,51 +3,119 @@
     <center>
       <p>
         <el-button @click="link">连接</el-button>
+        <!-- <el-button @click="visible = true">show</el-button> -->
         <!-- <el-button @click="linkLine">连接多条</el-button>
         <el-button @click="checkLines">选中多条</el-button>
         <el-button @click="unCheckedLines">取消选中多条</el-button>
-        <el-button @click="clearCheckedLines">清空选中线条</el-button> -->
+        <el-button @click="clearCheckedLines">清空选中线条</el-button>-->
       </p>
     </center>
-    <div class="box">
+    <!-- <div class="test-box-bg" v-if="visible" @click="visible = false"></div> -->
+    <div class="test-box">
       <vue-matchup
-        popover
-        ref="matchup"
-        v-model="lines"
-        :leftData="items"
-        :rightData="decItems"
-        :leftThead="leftThead"
-        :rightThead="rightThead"
-        :leftPopoverContentFun="leftPopoverContentFun"
-        :rightPopoverContentFun="rightPopoverContentFun"
-        leftTitle="清单"
-        :rightTitle="['报关1','报关2','报关3']"
-        @checkRow="checkRow"
-        @unCheckRow="unCheckRow"
-        @checkLine="checkLine"
-        @unCheckLine="unCheckLine"
-        @leftCheckChange="leftCheckChange"
-        @rightCheckChange="rightCheckChange"
-        @delete="deleteFun"
-      ></vue-matchup>
+      popover
+      ref="matchup"
+      v-model="lines"
+      :leftData="items"
+      :rightData="decItems"
+      :leftThead="leftThead"
+      :rightThead="rightThead"
+      :leftPopoverContentFun="leftPopoverContentFun"
+      :rightPopoverContentFun="rightPopoverContentFun"
+      leftTitle="清单"
+      :rightTitle="['报关1','报关2','报关3']"
+      @checkRow="checkRow"
+      @unCheckRow="unCheckRow"
+      @checkLine="checkLine"
+      @unCheckLine="unCheckLine"
+      @leftCheckChange="leftCheckChange"
+      @rightCheckChange="rightCheckChange"
+      @delete="deleteFun"
+    ></vue-matchup>
     </div>
+    <!-- <el-main>
+      <el-tabs v-model="activeName">
+        <el-tab-pane label="用户管理" name="1">
+          <vue-matchup
+            popover
+            ref="matchup"
+            v-model="lines"
+            :leftData="items"
+            :rightData="decItems"
+            :leftThead="leftThead"
+            :rightThead="rightThead"
+            :leftPopoverContentFun="leftPopoverContentFun"
+            :rightPopoverContentFun="rightPopoverContentFun"
+            leftTitle="清单"
+            :rightTitle="['报关1','报关2','报关3']"
+            @checkRow="checkRow"
+            @unCheckRow="unCheckRow"
+            @checkLine="checkLine"
+            @unCheckLine="unCheckLine"
+            @leftCheckChange="leftCheckChange"
+            @rightCheckChange="rightCheckChange"
+            @delete="deleteFun"
+          ></vue-matchup>
+        </el-tab-pane>
+        <el-tab-pane label="配置管理" name="2">配置管理</el-tab-pane>
+      </el-tabs>
+    </el-main>-->
+    <!-- <v-dialog title="图形显示" v-model="visible" fullscreen>
+      <el-switch v-model="value1" active-text="按图显示" inactive-text="按字显示"></el-switch>
+      <el-button @click="link">连接</el-button>
+      <div class="box" v-if="value1">
+        <vue-matchup
+          popover
+          ref="matchup"
+          v-model="lines"
+          :leftData="items"
+          :rightData="decItems"
+          :leftThead="leftThead"
+          :rightThead="rightThead"
+          :leftPopoverContentFun="leftPopoverContentFun"
+          :rightPopoverContentFun="rightPopoverContentFun"
+          leftTitle="清单"
+          :rightTitle="['报关1','报关2','报关3']"
+          @checkRow="checkRow"
+          @unCheckRow="unCheckRow"
+          @checkLine="checkLine"
+          @unCheckLine="unCheckLine"
+          @leftCheckChange="leftCheckChange"
+          @rightCheckChange="rightCheckChange"
+          @delete="deleteFun"
+        ></vue-matchup>
+      </div>
+      <div v-if="!value1">字字字字字字</div>
+      <div slot="footer">
+        <el-button @click="visible = false">取消</el-button>
+        <el-button @click="visible = false" type="primary">确定</el-button>
+      </div>
+    </v-dialog> -->
   </div>
 </template>
 
 <script>
 import mock from 'mockjs';
+import VDialog from './components/dialog/main';
+import { setTimeout } from 'timers';
 
 export default {
   name: "app",
+  components: {
+    VDialog
+  },
   data() {
     return {
+      value1: true,
+      activeName: '1',
+      visible: false,
       leftIdFun: (row, index) => `L${index}-${row.lineNo}`,
       rightIdFun: (row, index) => `R${index}-${row.lineNo}`,
       leftPopoverContentFun: data => {
         return this.$createElement("div", {}, [
-          this.$createElement("p", {}, ['序号: '+data.lineNo]),
-          this.$createElement("p", {}, ['SKU: '+data.sku]),
-          this.$createElement("p", {}, ['数量: '+data.qty]),
+          this.$createElement("p", {}, ['序号: ' + data.lineNo]),
+          this.$createElement("p", {}, ['SKU: ' + data.sku]),
+          this.$createElement("p", {}, ['数量: ' + data.qty]),
           this.$createElement("p", {}, ['单位: ' + data.unit]),
           this.$createElement("p", {}, ['毛重: ' + data.nw.weight + '/' + data.nw.unit])
         ]);
@@ -105,7 +173,7 @@ export default {
   },
   watch: {
     lines(val) {
-      console.log(JSON.stringify(val, null, 2))
+      // console.log(JSON.stringify(val, null, 2))
     }
   },
   methods: {
@@ -122,13 +190,13 @@ export default {
       const data = mock.mock({
         'color': /red|green|#139bd2/
       })
-      this.$refs.matchup.link({color: data.color});
+      this.$refs.matchup.link({ color: data.color });
     },
     linkLine() {
       this.$refs.matchup.link(
-        {leftIds: ["L1-2", "L1-3", "L1-1"],
-        rightIds: ["R1-4"],
-        color: "red"}
+        {          leftIds: ["L1-2", "L1-3", "L1-1"],
+          rightIds: ["R1-4"],
+          color: "red"        }
       );
     },
     // 选中线的方法
@@ -172,11 +240,8 @@ export default {
     rightCheckChange(obj) {
       console.log(`rightCheckChange ${JSON.stringify(obj)}`);
       this.$refs.matchup.clearCheckedLines();
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.$refs.matchup.drawLine();
+    },
+    getData() {
       const decItems = (num) => mock.mock({
         ['array|' + num]: [{
           'lineNo|+1': 1,
@@ -198,21 +263,49 @@ export default {
           gw: { 'weight|100-500': 100, unit: /kg|g|ml/ }
         }]
       })
-      const lines = mock.mock({
-        'array|5-8': [{ leftId: /L1-([1-9]|[1-2][0-9])/, rightId: /R1-([1-9]|1[0-9])|R2-([1-9]|1[0-4])/, color: /red|green|#139bd2/ }]
+      const lines = num => mock.mock({
+        ['array|' + num]: [{ leftId: /L1-([1-9])/, rightId: /R1-([1-9])|R2-([1-9])/, color: /red|green|#139bd2/ }]
       })
       setTimeout(() => {
-        this.decItems = [decItems(20).array, decItems(14).array]
-        this.items = [items(30).array];
-        this.lines = lines.array
+        this.decItems = [decItems(10).array, decItems(10).array]
+        this.items = [items(40).array];
+        this.lines = lines(20).array
       }, 1000);
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.getData()
     });
   }
 };
 </script>
 
 <style>
-body{
+.el-tabs__content {
+  overflow: auto !important;
+}
+.el-tabs__header {
+  margin: 0 !important;
+}
+.test-box {
+  padding: 40px;
+  margin-top: 20px 40px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  background-color: #fff;
+}
+.test-box-bg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000;
+  opacity: 0.2;
+}
+body {
   /* height: 120vh; */
 }
 .collapse-item__wrap {

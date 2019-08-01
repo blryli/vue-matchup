@@ -39,11 +39,8 @@ export default {
       }
     },
     lineCheckedIds(val) {
-      if (val.length > this.lineCheckedIdsOld.length) {
-        this._toggleTableRows(val, 'add')
-      } else {
-        this._toggleTableRows(this.lineCheckedIdsOld, 'remove')
-      }
+      this._toggleTableRows(this.lineCheckedIdsOld, 'remove')
+      this._toggleTableRows(val, 'add')
       this.drawAllLines();
       this.lineCheckedIdsOld = JSON.parse(JSON.stringify(val))
     },
@@ -63,7 +60,7 @@ export default {
     }
   },
   methods: {
-    init() {
+    onScroll() {
       this.scrollTargets = getParentNodes(this.matchup.$el.parentNode);
       this.scrollTargets.forEach(d => {
         on(d, "scroll", this.windowScroll);

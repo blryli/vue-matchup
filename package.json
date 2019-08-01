@@ -1,6 +1,6 @@
 {
   "name": "vue-matchup",
-  "version": "1.0.29",
+  "version": "1.0.31",
   "description": "A rollup + vue component development template",
   "main": "dist/vue-matchup.umd.js",
   "module": "dist/vue-matchup.esm.js",
@@ -29,21 +29,23 @@
     "url": "https://github.com/blryli/vue-matchup/issues"
   },
   "homepage": "https://github.com/blryli/vue-matchup#readme",
+  "dependencies": {
+    "vue": "^2.6.10"
+  },
   "devDependencies": {
-    "babel-core": "^6.26.3",
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
     "babel-plugin-module-resolver": "^3.2.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-3": "^6.24.1",
     "clean-css": "^4.2.1",
     "cross-env": "^5.2.0",
     "rollup": "^1.16.7",
-    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-css-only": "^1.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-uglify-es": "0.0.1",
     "rollup-plugin-vue": "^5.0.1",
-    "vue": "^2.6.10",
     "vue-template-compiler": "^2.6.10"
   }
 }

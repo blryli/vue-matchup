@@ -1,6 +1,8 @@
 # vue-matchup
 
-> A Vue.js project
+- canves实现的列表/表格关系动态匹配组件
+
+> 坐标计算用 getBoundingClientRect，动画效果会影响线展示位置，如: 使用element弹窗加载组件 vue-matchup 时，在动画结束前就已经算出个点相对窗口的坐标点，所以坐标值是有偏差的。解决办法是使用一个没有位移动画的弹窗加载组件。
 
 ### 演示
 
@@ -140,6 +142,14 @@ export default {
 
 ### 版本
 
+#### 1.0.31
+
+- 滚动增加debounce、线重绘增加throttle，优化组件性能。
+
+#### 1.0.30
+
+- 解决多线条选中，背景高亮显示不正确的问题。
+
 #### 1.0.29
 
 - 整合解决滚动导致偏移的问题。
@@ -150,20 +160,4 @@ export default {
 
 - 线条选中时，线对应的 table 行背景高亮。
 
-#### 1.0.27
-
-- 增加单个面板行的清空选中功能。
-
-- 减少canves重绘次数，只在需要时重绘。
-
-- 修复面板清空选中行时，值依然保留的问题。
-
-- 解决canves动画闪烁问题。
-
-- 线经过及选中时增加加粗效果。
-
-- 增加 collapseMaxHeight 属性，用于设置面板最大高度。
-
-
 [历史版本](https://github.com/blryli/vue-matchup/blob/master/VERSION.md)
-

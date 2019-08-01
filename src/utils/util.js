@@ -1,43 +1,24 @@
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-export function hasOwn(obj, key) {
-  return hasOwnProperty.call(obj, key);
-};
-
-export const generateId = function () {
-  return Math.floor(Math.random() * 10000);
-};
-
-export const offset = function (target) {
-  if (!target || !target.offsetParent) return false;
-  let top = 0;
-  let left = 0;
-  while (target.offsetParent) {
-    top += target.offsetTop;
-    left += target.offsetLeft;
-    target = target.offsetParent;
+export const debounce = function (fn, wait) {
+  let timer;
+  return function () {
+    const context = this
+    const args = arguments
+    timer && clearTimeout(timer)
+    timer = setTimeout(() => {
+      fn.apply(context, args)
+    }, wait)
   }
-  return {
-    top: top,
-    left: left
-  };
 }
 
-export const scroll = function () {
-  if (window.pageYOffset != null) {
-    return {
-      left: window.pageXOffset,
-      top: window.pageYOffset
-    }
-  } else if (document.compatMode == 'CSS1Compat') {
-    return {
-      left: document.documentElement.scrollLeft,
-      top: document.documentElement.scrollTop
-    }
-  }
-  return {
-    left: document.body.scrollLeft,
-    top: document.body.scrollTop
+export const throttle = function (fn, wait) {
+  let timer;
+  return function () {
+    const context = this
+    const args = arguments
+    !timer && fn.apply(context, args)
+    timer = setTimeout(() => {
+      timer = null
+    }, wait)
   }
 }
 

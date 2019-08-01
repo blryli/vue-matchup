@@ -2,7 +2,11 @@
   <div class="matchup" ref="matchup">
     <div class="left" ref="left" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
       <div class="card">
-        <v-collapse v-model="leftActiveName" :accordion="collapseAccordion" @change="collapseChange">
+        <v-collapse
+          v-model="leftActiveName"
+          :accordion="collapseAccordion"
+          @change="collapseChange"
+        >
           <v-collapse-item
             ref="left-collapse-item"
             v-for="(d, i) in realLeftData"
@@ -52,7 +56,11 @@
     </div>
     <div class="right" ref="right" id="right" :style="{width: `calc(50% - ${cvsWidth/2+5}px)`}">
       <div class="card">
-        <v-collapse v-model="rightActiveName" :accordion="collapseAccordion" @change="collapseChange">
+        <v-collapse
+          v-model="rightActiveName"
+          :accordion="collapseAccordion"
+          @change="collapseChange"
+        >
           <v-collapse-item
             ref="right-collapse-item"
             v-for="(d, i) in realRightData"
@@ -90,8 +98,8 @@ import VCollapse from 'components/Collapse'
 import VCollapseItem from 'components/CollapseItem'
 import VTable from 'components/Table'
 import VCanves from 'components/Canves'
-import { offset, scroll } from "utils/util";
-import { on, off } from "utils/dom";
+import { debounce, throttle } from "utils/util";
+import { on, off, getDomClientRect } from "utils/dom";
 import Handle from "./handle";
 
 export default {
@@ -180,7 +188,7 @@ export default {
   },
   watch: {
     lines(val) {
-      val && this.loadFinish && this.drawLine();
+        val && this.loadFinish && this.drawLine();
     },
     leftData(val) {
       val && this.loadFinish && this.init();
@@ -191,9 +199,9 @@ export default {
   },
   methods: {
     init() {
-      console.log("component init...");
+      console.log("matchup init...");
       this.$nextTick(() => {
-        this.$refs.canves.init();
+        this.$refs.canves.onScroll();
         this.leftHeader = Array.from(
           this.$refs.left.querySelectorAll(".collapse-item__header")
         );
@@ -215,10 +223,10 @@ export default {
           this.rightChecked.push([]);
         });
         this.leftContent.forEach(d => {
-          on(d, "scroll", this.scrollChange);
+          on(d, "scroll", this.throttleScrollChange);
         });
         this.rightContent.forEach(d => {
-          on(d, "scroll", this.scrollChange);
+          on(d, "scroll", this.throttleScrollChange);
         });
         let leftHeight = 0;
         this.$refs["left-collapse-item"].forEach((d, i) => {
@@ -239,18 +247,14 @@ export default {
         this.$refs["right-table"].forEach(d => {
           d.init();
         });
-        !this.leftData.length && (this.leftActiveName = []);
-        !this.rightData.length && (this.rightActiveName = []);
         setTimeout(() => {
-          !this.leftData.length && (this.leftActiveName = ["1"]);
-          !this.rightData.length && (this.rightActiveName = ["1"]);
           this.redrawLine();
         }, 0);
       });
     },
     drawLine() {
-      const leftHeight = this.$refs.left.offsetHeight;
-      const rightHeight = this.$refs.right.offsetHeight;
+      const leftHeight = getDomClientRect(this.$refs.left).height;
+      const rightHeight = getDomClientRect(this.$refs.right).height;
       this.cvsBoxHeight = leftHeight > rightHeight ? leftHeight : rightHeight;
       this.$refs.canves.drawLine();
     },
@@ -261,9 +265,9 @@ export default {
         return title[i] || title[0];
       }
     },
-    scrollChange(event) {
+    scrollChange() {
       if (!this.value.length) return;
-      this.drawLine();
+      this.redrawLine();
     },
     collapseChange() {
       if (!this.value.length) {
@@ -277,22 +281,23 @@ export default {
     // 重绘
     redrawLine() {
       if (!this.lines.length || !this.loadFinish) return;
-      const timer = setInterval(() => {
-        this.drawLine();
-      }, 16.7);
-      setTimeout(() => {
-        clearTimeout(timer);
-        this.$refs.canves.clearActiveName();
-      }, this.duration);
-    },
-    sizeChange() {
-      this.drawLine();
+      this.$nextTick(() => {
+        const timer = setInterval(() => {
+          this.drawLine();
+        }, 16.7);
+        setTimeout(() => {
+          clearTimeout(timer);
+          this.$refs.canves.clearActiveName();
+        }, this.duration);
+      })
     }
   },
   mounted() {
+    console.log('match mounted')
     this.$nextTick(() => {
+      this.throttleScrollChange = throttle(this.scrollChange, 16.7)
       this.init();
-      on(window, "resize", this.sizeChange);
+      on(window, "resize", debounce(this.drawLine, 300));
     });
   },
   beforeDestroy() {
@@ -302,7 +307,7 @@ export default {
     this.rightContent.forEach((d, i) => {
       off(d, "scroll", this.scrollChange, i);
     });
-    off(window, "resize", this.sizeChange);
+    off(window, "resize", debounce(this.drawLine, 300));
   }
 };
 </script>

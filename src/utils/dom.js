@@ -101,6 +101,7 @@ export const removeEventListener = function (nodes, handler) {
  * @param {节点} target 
  */
 export const getDomClientRect = function (target) {
+  if(!target) console.error('获取id节点失败')
   const targetRect = target.getBoundingClientRect();
   const top = targetRect.top;
   const bottom = targetRect.bottom;
